@@ -123,8 +123,11 @@ public final class RightBar {
             // paneli ilgili satirin hizasina getir
             int[] row = new int[2], cont = new int[2];
             rows[k].getLocationInWindow(row); panelContainer.getLocationInWindow(cont);
-            panels[k].setTranslationY(Math.max(0, row[1] - cont[1]));
-            panels[k].setVisibility(View.VISIBLE);
+            View p = panels[k];
+            p.setVisibility(View.VISIBLE);
+            p.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);   // yukseklik: kabin altina tasirmamak icin
+            int maxY = Math.max(0, panelContainer.getHeight() - p.getMeasuredHeight());
+            p.setTranslationY(Math.min(Math.max(0, row[1] - cont[1]), maxY));
             expands[k].setRotation(180f);
         }
     }
@@ -156,7 +159,7 @@ public final class RightBar {
         ViewGroup.LayoutParams lp = panelMap.getLayoutParams();
         float d = a.getResources().getDisplayMetrics().density;
         int screenW = a.getResources().getDisplayMetrics().widthPixels, screenH = a.getResources().getDisplayMetrics().heightPixels;
-        if (mapFull) { lp.width = screenW - (int) ((64 + 100 + 8) * d); lp.height = screenH - (int) ((48 + 8) * d); }
+        if (mapFull) { lp.width = screenW - (int) ((64 + 98 + 8) * d); lp.height = screenH - (int) ((48 + 8) * d); }
         else { lp.width = (int) (360 * d); lp.height = (int) (240 * d); }
         panelMap.setLayoutParams(lp);
         expMap.setRotation(mapFull ? 180f : 0f);

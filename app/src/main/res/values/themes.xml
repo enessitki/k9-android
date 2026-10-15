@@ -38,14 +38,13 @@
         <item name="android:scaleType">centerInside</item>
         <item name="android:backgroundTint">@color/white</item>
     </style>
-    <!-- Expand (panel ac/kapa): ikona bitisik, sutunun sag kenarinda -->
+    <!-- Expand (panel ac/kapa): video uzerinde, cubuga bitisik kucuk koyu kutu -->
     <style name="ExpandBtn">
-        <item name="android:layout_width">26dp</item>
-        <item name="android:layout_height">26dp</item>
+        <item name="android:layout_width">30dp</item>
+        <item name="android:layout_height">30dp</item>
         <item name="android:layout_gravity">end|center_vertical</item>
         <item name="android:foreground">@drawable/baseline_menu_open_24</item>
-        <item name="android:foregroundTint">@color/nav_label_idle</item>
-        <item name="android:background">@android:color/transparent</item>
+        <item name="android:background">@drawable/bg_expand</item>
     </style>
     <!-- Metin girisi: yuvarlatilmis koyu kutu -->
     <style name="Input">

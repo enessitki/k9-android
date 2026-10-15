@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Sag fonksiyon cubugu: 96dp, OPAK, ekranin sag kenarina yaslanir.
-     Sol 32dp: expand dugmeleri (ikona bitisik), sag 64dp: ana ikonlar.
-     Ana ikon = eylem (ac/kapa), expand = ilgili ayar paneli (sola acilir). -->
+<!-- Sag taraf: 32dp expand sutunu (SEFFAF, video uzerinde, cubuga bitisik) +
+     64dp opak fonksiyon cubugu (sol cubukla ayni genislik). Her iki sutun ayni
+     satir yuksekligi ve dikeyde ortali -> expand ile ikon ayni hizada. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="96dp"
     android:layout_height="match_parent"
-    android:background="@color/bar_surface"
     android:orientation="horizontal">
 
-    <View
-        android:layout_width="0.5dp"
-        android:layout_height="match_parent"
-        android:background="@color/bar_hairline" />
-
-    <!-- Expand sutunu -->
+    <!-- Expand sutunu: seffaf -->
     <LinearLayout
-        android:layout_width="31.5dp"
+        android:layout_width="32dp"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingTop="48dp">
+        android:gravity="center_vertical"
+        android:orientation="vertical">
         <FrameLayout style="@style/FnRow"><ImageButton android:id="@+id/expand_bitrate" style="@style/ExpandBtn" /></FrameLayout>
         <FrameLayout style="@style/FnRow"><ImageButton android:id="@+id/expand_led" style="@style/ExpandBtn" /></FrameLayout>
         <FrameLayout style="@style/FnRow"><ImageButton android:id="@+id/expand_map" style="@style/ExpandBtn" /></FrameLayout>
@@ -27,18 +21,24 @@
         <FrameLayout style="@style/FnRow" />
     </LinearLayout>
 
-    <!-- Ana ikon sutunu -->
-    <LinearLayout
+    <!-- Fonksiyon cubugu: opak, 64dp -->
+    <FrameLayout
         android:layout_width="64dp"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingTop="48dp">
-        <FrameLayout android:id="@+id/row_bitrate" style="@style/FnRow"><ImageButton android:id="@+id/btn_bitrate" style="@style/FnIcon" android:background="@drawable/speedometer" /></FrameLayout>
-        <FrameLayout android:id="@+id/row_led" style="@style/FnRow"><ImageButton android:id="@+id/btn_led" style="@style/FnIcon" android:background="@drawable/ic_headlights" android:rotation="-90" /></FrameLayout>
-        <FrameLayout android:id="@+id/row_map" style="@style/FnRow"><ImageButton android:id="@+id/btn_map" style="@style/FnIcon" android:background="@drawable/ic_map_24" /></FrameLayout>
-        <FrameLayout android:id="@+id/row_record" style="@style/FnRow"><ImageButton android:id="@+id/btn_record" style="@style/FnIcon" android:background="@drawable/ic_baseline_photo_camera_24" /></FrameLayout>
-        <FrameLayout android:id="@+id/row_speaker" style="@style/FnRow"><ImageButton android:id="@+id/btn_speaker" style="@style/FnIcon" android:background="@drawable/baseline_volume_up_24" /></FrameLayout>
-        <!-- Bas-konus: basili tutuldugu surece mikrofon K9'a gider -->
-        <FrameLayout android:id="@+id/row_mic" style="@style/FnRow"><ImageButton android:id="@+id/btn_mic" style="@style/FnIcon" android:background="@drawable/ic_baseline_mic_24" /></FrameLayout>
-    </LinearLayout>
+        android:background="@color/bar_surface">
+        <View android:layout_width="0.5dp" android:layout_height="match_parent" android:layout_gravity="start" android:background="@color/bar_hairline" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+            <FrameLayout android:id="@+id/row_bitrate" style="@style/FnRow"><ImageButton android:id="@+id/btn_bitrate" style="@style/FnIcon" android:background="@drawable/speedometer" /></FrameLayout>
+            <FrameLayout android:id="@+id/row_led" style="@style/FnRow"><ImageButton android:id="@+id/btn_led" style="@style/FnIcon" android:background="@drawable/ic_headlights" android:rotation="-90" /></FrameLayout>
+            <FrameLayout android:id="@+id/row_map" style="@style/FnRow"><ImageButton android:id="@+id/btn_map" style="@style/FnIcon" android:background="@drawable/ic_map_24" /></FrameLayout>
+            <FrameLayout android:id="@+id/row_record" style="@style/FnRow"><ImageButton android:id="@+id/btn_record" style="@style/FnIcon" android:background="@drawable/ic_baseline_photo_camera_24" /></FrameLayout>
+            <FrameLayout android:id="@+id/row_speaker" style="@style/FnRow"><ImageButton android:id="@+id/btn_speaker" style="@style/FnIcon" android:background="@drawable/baseline_volume_up_24" /></FrameLayout>
+            <!-- Bas-konus: basili tutuldugu surece mikrofon K9'a gider -->
+            <FrameLayout android:id="@+id/row_mic" style="@style/FnRow"><ImageButton android:id="@+id/btn_mic" style="@style/FnIcon" android:background="@drawable/ic_baseline_mic_24" /></FrameLayout>
+        </LinearLayout>
+    </FrameLayout>
 </LinearLayout>
