@@ -83,15 +83,18 @@ Cihaz sahipliğini kaldırmak: Ayarlar → Kiosk'tan çık, sonra
 
 ## Harita
 
-Çevrimdışı tile arşivlerini (`.sqlite`/`.zip`/`.mbtiles`, osmdroid formatı,
-ör. MOBAC "osmdroid SQLite" çıktısı) USB ile şuraya kopyalayın:
+Eski projedeki egolabs "offline map" ile aynı mekanizma (osmdroid
+`OfflineTileProvider`). Tile arşivi (`map.sqlite`, MOBAC "osmdroid SQLite"
+çıktısı; `.zip/.mbtiles/.gemf` de olur) şu sırayla aranır:
 
-```
-Android/data/com.esetron.k9/files/osmdroid/
-```
+1. `Android/data/com.esetron.k9/files/osmdroid/` (root ve izin gerekmez; USB ile kopyalayın)
+2. `/sdcard/osmdroid/` (eski projenin yeri; Android 11+ scoped storage okumaya izin vermeyebilir)
+3. APK içinde `assets/map.sqlite` varsa ilk açılışta 1'e kopyalanır
 
-Arşiv yoksa ağ varsa çevrimiçi OSM kullanılır. Operatör konumu telefon
-GPS'inden; K9 konumu telemetri eklenince `MapController.setK9Position`.
+Arşiv yoksa çevrimiçi OSM kullanılır ve harita açılınca ekranda yol gösterilir;
+DURUM sayfası "Harita kaynağı" satırında hangisinin aktif olduğu yazar.
+Operatör konumu telefon GPS'inden; K9 konumu telemetri eklenince
+`MapController.setK9Position`.
 
 ## Kayıtlar
 

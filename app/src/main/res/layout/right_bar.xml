@@ -1,29 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Sag fonksiyon cubugu: ikon dugmeler. Panel acan dugmeler cyan'a doner. -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="80dp"
-    android:layout_height="match_parent">
+<!-- Sag fonksiyon cubugu (eski projedeki gibi): sagda 80dp cubukta ANA IKON =
+     eylem (ac/kapa), solunda 40dp sutunda EXPAND dugmesi = ilgili ayar panelini
+     sola acar/kapatir (acikken 180 derece doner). Satirlar sabit 58dp, iki sutun hizali. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="120dp"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/left_bar_try"
-        android:rotation="180" />
-
+    <!-- Expand sutunu: video uzerinde, seffaf -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="40dp"
         android:layout_height="match_parent"
-        android:gravity="center_horizontal"
         android:orientation="vertical"
         android:paddingTop="48dp">
-
-        <ImageButton android:id="@+id/btn_bitrate" style="@style/FnIcon" android:background="@drawable/speedometer" />
-        <ImageButton android:id="@+id/btn_led" style="@style/FnIcon" android:background="@drawable/ic_headlights" android:rotation="-90" />
-        <ImageButton android:id="@+id/btn_blind" style="@style/FnIcon" android:background="@drawable/ic_blind_24" />
-        <ImageButton android:id="@+id/btn_map" style="@style/FnIcon" android:background="@drawable/ic_map_24" />
-        <ImageButton android:id="@+id/btn_record" style="@style/FnIcon" android:background="@drawable/ic_baseline_photo_camera_24" />
-        <ImageButton android:id="@+id/btn_speaker" style="@style/FnIcon" android:background="@drawable/baseline_volume_up_24" />
-        <!-- Bas-konus: basili tutuldugu surece mikrofon K9'a gider -->
-        <ImageButton android:id="@+id/btn_mic" style="@style/FnIcon" android:background="@drawable/ic_baseline_mic_24" />
+        <FrameLayout style="@style/FnRow"><ImageButton android:id="@+id/expand_bitrate" style="@style/ExpandBtn" /></FrameLayout>
+        <FrameLayout style="@style/FnRow"><ImageButton android:id="@+id/expand_led" style="@style/ExpandBtn" /></FrameLayout>
+        <FrameLayout style="@style/FnRow"><ImageButton android:id="@+id/expand_map" style="@style/ExpandBtn" /></FrameLayout>
+        <FrameLayout style="@style/FnRow"><ImageButton android:id="@+id/expand_record" style="@style/ExpandBtn" /></FrameLayout>
+        <FrameLayout style="@style/FnRow"><ImageButton android:id="@+id/expand_speaker" style="@style/ExpandBtn" /></FrameLayout>
+        <FrameLayout style="@style/FnRow" />
     </LinearLayout>
-</FrameLayout>
+
+    <!-- Ana ikon cubugu -->
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="match_parent">
+        <View android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/left_bar_try" android:rotation="180" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingTop="48dp">
+            <FrameLayout android:id="@+id/row_bitrate" style="@style/FnRow"><ImageButton android:id="@+id/btn_bitrate" style="@style/FnIcon" android:background="@drawable/speedometer" /></FrameLayout>
+            <FrameLayout android:id="@+id/row_led" style="@style/FnRow"><ImageButton android:id="@+id/btn_led" style="@style/FnIcon" android:background="@drawable/ic_headlights" android:rotation="-90" /></FrameLayout>
+            <FrameLayout android:id="@+id/row_map" style="@style/FnRow"><ImageButton android:id="@+id/btn_map" style="@style/FnIcon" android:background="@drawable/ic_map_24" /></FrameLayout>
+            <FrameLayout android:id="@+id/row_record" style="@style/FnRow"><ImageButton android:id="@+id/btn_record" style="@style/FnIcon" android:background="@drawable/ic_baseline_photo_camera_24" /></FrameLayout>
+            <FrameLayout android:id="@+id/row_speaker" style="@style/FnRow"><ImageButton android:id="@+id/btn_speaker" style="@style/FnIcon" android:background="@drawable/baseline_volume_up_24" /></FrameLayout>
+            <!-- Bas-konus: basili tutuldugu surece mikrofon K9'a gider -->
+            <FrameLayout android:id="@+id/row_mic" style="@style/FnRow"><ImageButton android:id="@+id/btn_mic" style="@style/FnIcon" android:background="@drawable/ic_baseline_mic_24" /></FrameLayout>
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

@@ -83,9 +83,12 @@ public final class MainActivity extends AppCompatActivity implements SurfaceHold
 
         // Harita (sag panel icinde)
         mapCtl = new MapController(this, findViewById(R.id.map));
-        mapCtl.setListener((lat, lon, mgrs) -> {
-            selfLat = lat; selfLon = lon; selfMgrs = mgrs; hasFix = true;
-            topBar.onSelfLocation(lat, lon, mgrs);
+        mapCtl.setListener(new MapController.Listener() {
+            @Override public void onSelfLocation(double lat, double lon, String mgrs) {
+                selfLat = lat; selfLon = lon; selfMgrs = mgrs; hasFix = true;
+                topBar.onSelfLocation(lat, lon, mgrs);
+            }
+            @Override public void onMapMessage(String msg) { showMessage(msg); }
         });
 
         // Arayuz parcalari (sira: ust/sol/sag birbirine bagli degil, sayfalar leftBar'a)

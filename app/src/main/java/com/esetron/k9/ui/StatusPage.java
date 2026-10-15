@@ -18,14 +18,14 @@ import java.util.Locale;
 /** Durum sayfasi: link/video, K9 ayarlari (ayar kanalindan), telefon durumu. */
 public final class StatusPage {
     private final MainActivity a;
-    private final TextView link, video, k9, bitrate, configState, k9Values, battery, gps, mgrs, kiosk, disk, version;
+    private final TextView link, video, k9, bitrate, configState, k9Values, battery, gps, mgrs, kiosk, disk, version, mapSrc;
 
     public StatusPage(MainActivity a) {
         this.a = a;
         link = a.findViewById(R.id.st_link); video = a.findViewById(R.id.st_video); k9 = a.findViewById(R.id.st_k9);
         bitrate = a.findViewById(R.id.st_bitrate); configState = a.findViewById(R.id.st_config); k9Values = a.findViewById(R.id.st_k9_values);
         battery = a.findViewById(R.id.st_battery); gps = a.findViewById(R.id.st_gps); mgrs = a.findViewById(R.id.st_mgrs);
-        kiosk = a.findViewById(R.id.st_kiosk); disk = a.findViewById(R.id.st_disk); version = a.findViewById(R.id.st_version);
+        kiosk = a.findViewById(R.id.st_kiosk); disk = a.findViewById(R.id.st_disk); version = a.findViewById(R.id.st_version); mapSrc = a.findViewById(R.id.st_map);
         a.findViewById(R.id.st_refresh).setOnClickListener(v -> refresh());
     }
 
@@ -42,6 +42,7 @@ public final class StatusPage {
         File dir = a.getExternalFilesDir(null);
         if (dir != null) { StatFs st = new StatFs(dir.getAbsolutePath()); disk.setText(String.format(Locale.US, "%.1f / %.1f GB boş", st.getAvailableBytes() / 1073741824.0, st.getTotalBytes() / 1073741824.0)); }
         version.setText(BuildConfig.VERSION_NAME);
+        mapSrc.setText(a.mapCtl.sourceInfo()); mapSrc.setTextColor(a.getColor(a.mapCtl.isOffline() ? R.color.ok : R.color.warn));
         configState.setText("sorgulanıyor…");
         a.config.get(new ConfigClient.Callback() {
             @Override public void onReply(JSONObject r) {

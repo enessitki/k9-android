@@ -25,14 +25,28 @@
         <item name="android:textStyle">bold</item>
         <item name="android:letterSpacing">0.05</item>
     </style>
-    <!-- Sag fonksiyon ikonu -->
+    <!-- Sag fonksiyon satiri (iki sutunda ayni yukseklik) -->
+    <style name="FnRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">58dp</item>
+    </style>
+    <!-- Sag fonksiyon ana ikonu -->
     <style name="FnIcon">
-        <item name="android:layout_width">48dp</item>
-        <item name="android:layout_height">48dp</item>
-        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_width">46dp</item>
+        <item name="android:layout_height">46dp</item>
+        <item name="android:layout_gravity">center</item>
         <item name="android:scaleType">centerInside</item>
         <item name="android:backgroundTint">@color/white</item>
         <item name="android:translationZ">1dp</item>
+    </style>
+    <!-- Expand (panel ac/kapa) dugmesi: eski projedeki baseline_menu_open_24 + layout_bg -->
+    <style name="ExpandBtn">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:foreground">@drawable/baseline_menu_open_24</item>
+        <item name="android:background">@drawable/layout_bg</item>
+        <item name="android:translationZ">2dp</item>
     </style>
     <!-- Yan panel kart satirlari -->
     <style name="Row">

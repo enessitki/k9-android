@@ -21,7 +21,12 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
+import android.os.Environment;
+
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,14 +34,18 @@ import mil.nga.grid.features.Point;
 import mil.nga.mgrs.MGRS;
 
 /**
- * Harita (osmdroid), cevrimdisi. Tile arsivleri (.sqlite/.zip/.mbtiles)
- * Android/data/com.esetron.k9/files/osmdroid/ altina USB ile kopyalanir;
- * root gerekmez. Arsiv yoksa cevrimici MAPNIK (ag varsa).
+ * Harita (osmdroid), cevrimdisi. Eski projedeki egolabs OfflineMapView ile
+ * ayni mekanizma: tile arsivi (.sqlite/.zip/.mbtiles/.gemf) OfflineTileProvider
+ * ile acilir. Aranan yerler, sirayla:
+ *   1. Android/data/com.esetron.k9/files/osmdroid/   (root ve izin gerekmez)
+ *   2. /sdcard/osmdroid/                              (eski projenin yeri; okunabiliyorsa)
+ *   3. assets/map.sqlite (APK icinde geldiyse ilk acilista 1'e kopyalanir)
+ * Hicbiri yoksa cevrimici MAPNIK kullanilir ve kullaniciya dosya yolu soylenir.
  * Marker'lar: operator (telefon GPS'i) ve K9 (ileride telemetri ile).
  */
 public final class MapController implements LocationListener {
     private static final String TAG = "MapController";
-    public interface Listener { void onSelfLocation(double lat, double lon, String mgrs); }
+    public interface Listener { void onSelfLocation(double lat, double lon, String mgrs); void onMapMessage(String msg); }
 
     private final Context ctx;
     private final MapView map;
@@ -44,6 +53,8 @@ public final class MapController implements LocationListener {
     private final LocationManager lm;
     private Listener listener;
     private boolean followSelf = true;
+    private String sourceInfo = "-";
+    private boolean offline;
 
     public MapController(Context ctx, MapView map) {
         this.ctx = ctx; this.map = map;
@@ -67,12 +78,21 @@ public final class MapController implements LocationListener {
         lm = (LocationManager) ctx.getSystemService(Context.LOCATION_SERVICE);
     }
 
+    private static boolean isArchive(File f) {
+        String n = f.getName().toLowerCase();
+        return f.isFile() && (n.endsWith(".sqlite") || n.endsWith(".zip") || n.endsWith(".mbtiles") || n.endsWith(".gemf"));
+    }
+
     private void setupTiles(File base) {
         List<File> archives = new ArrayList<>();
-        File[] files = base != null ? base.listFiles() : null;
-        if (files != null) for (File f : files) {
-            String n = f.getName().toLowerCase();
-            if (n.endsWith(".sqlite") || n.endsWith(".zip") || n.endsWith(".mbtiles") || n.endsWith(".gemf")) archives.add(f);
+        List<File> dirs = new ArrayList<>();
+        if (base != null) { copyAssetMap(base); dirs.add(base); }
+        dirs.add(new File(Environment.getExternalStorageDirectory(), "osmdroid"));   // eski projenin yeri
+        for (File dir : dirs) {
+            File[] files = dir.listFiles();
+            if (files == null) continue;                       // yok ya da okunamiyor (scoped storage)
+            for (File f : files) if (isArchive(f)) archives.add(f);
+            if (!archives.isEmpty()) break;
         }
         if (!archives.isEmpty()) {
             try {
@@ -82,12 +102,42 @@ public final class MapController implements LocationListener {
                 ITileSource ts = FileBasedTileSource.getSource(src);
                 map.setTileSource(ts);
                 map.setUseDataConnection(false);
+                map.setTilesScaledToDpi(true);
+                offline = true;
+                sourceInfo = "çevrimdışı: " + archives.get(0).getAbsolutePath();
                 Log.i(TAG, "Cevrimdisi harita: " + archives.size() + " arsiv, kaynak " + src);
                 return;
             } catch (Exception e) { Log.w(TAG, "Arsiv acilamadi, cevrimici kaynak", e); }
         }
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setUseDataConnection(true);
+        offline = false;
+        sourceInfo = "ÇEVRİMİÇİ (harita dosyası yok). Kopyalayın: " + (base != null ? base.getAbsolutePath() : "Android/data/com.esetron.k9/files/osmdroid") + "/map.sqlite";
+        Log.w(TAG, sourceInfo);
+    }
+
+    /** APK ile assets/map.sqlite geldiyse ilk acilista uygulama dizinine kopyala (eski FileUtils). */
+    private void copyAssetMap(File base) {
+        File target = new File(base, "map.sqlite");
+        if (target.exists()) return;
+        try (InputStream in = ctx.getAssets().open("map.sqlite")) {
+            if (!base.exists() && !base.mkdirs()) return;
+            try (OutputStream out = new FileOutputStream(target)) {
+                byte[] buf = new byte[65536]; int n;
+                while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+            }
+            Log.i(TAG, "assets/map.sqlite kopyalandi: " + target);
+        } catch (java.io.IOException ignored) {       // asset yok: normal
+            if (target.exists() && target.length() == 0) target.delete();
+        }
+    }
+
+    public boolean isOffline() { return offline; }
+    public String sourceInfo() { return sourceInfo; }
+
+    /** Harita acilinca: dosya yoksa kullaniciya soyle (sessizce cevrimici kalmasin). */
+    public void checkSource() {
+        if (!offline && listener != null) listener.onMapMessage(sourceInfo);
     }
 
     public void setListener(Listener l) { listener = l; }

@@ -25,6 +25,8 @@
             <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Kiosk" /><TextView android:id="@+id/st_kiosk" style="@style/RowValue" android:text="-" /></LinearLayout>
             <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Depolama" /><TextView android:id="@+id/st_disk" style="@style/RowValue" android:text="-" /></LinearLayout>
             <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Uygulama" /><TextView android:id="@+id/st_version" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <TextView style="@style/SectionTitle" android:text="HARİTA KAYNAĞI" />
+            <TextView android:id="@+id/st_map" style="@style/RowValue" android:layout_width="match_parent" android:paddingHorizontal="10dp" android:text="-" android:textSize="11sp" />
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp">
                 <Button android:id="@+id/st_refresh" style="@style/BtnGhost" android:text="YENİLE" />
             </LinearLayout>
