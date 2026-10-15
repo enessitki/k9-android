@@ -156,7 +156,7 @@ public final class RightBar {
         ViewGroup.LayoutParams lp = panelMap.getLayoutParams();
         float d = a.getResources().getDisplayMetrics().density;
         int screenW = a.getResources().getDisplayMetrics().widthPixels, screenH = a.getResources().getDisplayMetrics().heightPixels;
-        if (mapFull) { lp.width = screenW - (int) ((64 + 124 + 8) * d); lp.height = screenH - (int) ((48 + 8) * d); }
+        if (mapFull) { lp.width = screenW - (int) ((64 + 100 + 8) * d); lp.height = screenH - (int) ((48 + 8) * d); }
         else { lp.width = (int) (360 * d); lp.height = (int) (240 * d); }
         panelMap.setLayoutParams(lp);
         expMap.setRotation(mapFull ? 180f : 0f);

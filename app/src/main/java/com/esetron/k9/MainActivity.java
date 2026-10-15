@@ -20,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
 
 import com.esetron.k9.capture.CaptureService;
 import com.esetron.k9.capture.Screenshot;
@@ -76,6 +77,9 @@ public final class MainActivity extends AppCompatActivity implements SurfaceHold
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Kenardan kenara: sistem cubuklari gizliyken sag/alt bos serit kalmasin,
+        // cubuklar ekranin gercek kenarina otursun.
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.main);
         settings = new Settings(this);
         video = findViewById(R.id.video);

@@ -21,7 +21,7 @@
     <string name="record_count">Kayıt</string>
     <string name="filter_all">TÜMÜ</string>
     <string name="filter_video">VİDEO</string>
-    <string name="filter_photo">FOTOĞRAF</string>
+    <string name="filter_photo">FOTO</string>
     <string name="search_hint">Ad veya tarih ile ara</string>
     <string name="no_records">Kayıt yok</string>
 </resources>

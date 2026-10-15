@@ -3,94 +3,100 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Sifre kapisi: sayfa her acildiginda gorunur, dogru sifreyle kalkar -->
-    <LinearLayout
+    <!-- Sifre kapisi: ortada kart -->
+    <FrameLayout
         android:id="@+id/settings_lock"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/black"
-        android:gravity="center"
-        android:orientation="vertical"
         android:translationZ="10dp">
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/settings_locked" android:textColor="@color/white" android:textSize="18sp" android:textStyle="bold" />
-        <EditText
-            android:id="@+id/settings_password"
-            android:layout_width="280dp"
+        <LinearLayout
+            android:layout_width="360dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="@color/accent_cyan"
-            android:hint="@string/password"
-            android:imeOptions="actionDone"
-            android:inputType="textPassword"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textColorHint="#AAAAAA"
-            android:textSize="20sp" />
-        <Button android:id="@+id/settings_login" style="@style/BtnPrimary" android:layout_width="280dp" android:layout_marginTop="12dp" android:layout_marginEnd="0dp" android:text="@string/login" />
-        <TextView android:id="@+id/settings_login_warning" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="" android:textColor="@color/bad" android:textSize="13sp" />
-    </LinearLayout>
+            android:layout_gravity="center"
+            android:background="@drawable/card_background_dark"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="24dp">
+            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/baseline_settings_24" android:importantForAccessibility="no" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="AYARLAR" android:textColor="@color/white" android:textSize="16sp" android:textStyle="bold" android:letterSpacing="0.1" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/settings_locked" android:textColor="@color/text_dim" android:textSize="12sp" />
+            <EditText
+                android:id="@+id/settings_password"
+                style="@style/Input"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="18dp"
+                android:gravity="center"
+                android:hint="@string/password"
+                android:imeOptions="actionDone"
+                android:inputType="textPassword"
+                android:textSize="18sp" />
+            <Button android:id="@+id/settings_login" style="@style/BtnPrimary" android:layout_width="match_parent" android:layout_marginTop="12dp" android:layout_marginEnd="0dp" android:text="@string/login" />
+            <TextView android:id="@+id/settings_login_warning" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="" android:textColor="@color/bad" android:textSize="12sp" />
+        </LinearLayout>
+    </FrameLayout>
 
-<ScrollView
-    android:id="@+id/settings_content"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="8dp">
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/settings_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:padding="8dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-        <!-- Sol kart: uygulama baglanti ayarlari + kiosk -->
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="8dp">
-            <TextView style="@style/SectionTitle" android:text="BAĞLANTI (UYGULAMA)" />
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="K9 IP" /><EditText android:id="@+id/set_ip" style="@style/RowEdit" android:layout_width="160dp" android:inputType="text" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Kontrol portu" /><EditText android:id="@+id/set_control_port" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Ayar portu" /><EditText android:id="@+id/set_config_port" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Video portu" /><EditText android:id="@+id/set_video_port" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Ses alma portu" /><EditText android:id="@+id/set_audio_rx_port" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Ses gönderme portu" /><EditText android:id="@+id/set_audio_tx_port" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Jitter buffer (ms)" /><EditText android:id="@+id/set_jitter" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp">
-                <Button android:id="@+id/set_save" style="@style/BtnPrimary" android:text="KAYDET VE UYGULA" />
+            <!-- Sol sutun: baglanti + guvenlik -->
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginEnd="8dp" android:layout_weight="1" android:orientation="vertical">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="8dp">
+                    <LinearLayout style="@style/CardHeader"><View style="@style/CardHeaderMark" /><TextView style="@style/CardHeaderText" android:text="BAĞLANTI" /><Button android:id="@+id/set_save" style="@style/BtnPrimary" android:layout_height="32dp" android:layout_marginEnd="0dp" android:text="KAYDET" /></LinearLayout>
+                    <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="K9 IP adresi" /><EditText android:id="@+id/set_ip" style="@style/Input" android:inputType="text" /></LinearLayout>
+                    <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Kontrol portu" /><EditText android:id="@+id/set_control_port" style="@style/Input" android:inputType="number" /></LinearLayout>
+                    <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Ayar portu" /><EditText android:id="@+id/set_config_port" style="@style/Input" android:inputType="number" /></LinearLayout>
+                    <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Video portu" /><EditText android:id="@+id/set_video_port" style="@style/Input" android:inputType="number" /></LinearLayout>
+                    <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Ses alma portu" /><EditText android:id="@+id/set_audio_rx_port" style="@style/Input" android:inputType="number" /></LinearLayout>
+                    <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Ses gönderme portu" /><EditText android:id="@+id/set_audio_tx_port" style="@style/Input" android:inputType="number" /></LinearLayout>
+                    <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Jitter buffer (ms)" /><EditText android:id="@+id/set_jitter" style="@style/Input" android:inputType="number" /></LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="8dp">
+                    <LinearLayout style="@style/CardHeader"><View style="@style/CardHeaderMark" /><TextView style="@style/CardHeaderText" android:text="GÜVENLİK" /><Button android:id="@+id/settings_logout" style="@style/BtnGhost" android:layout_height="32dp" android:layout_marginEnd="0dp" android:text="KİLİTLE" /></LinearLayout>
+                    <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Yeni yönetici şifresi" /><EditText android:id="@+id/new_password" style="@style/Input" android:inputType="textPassword" /></LinearLayout>
+                    <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Yeni şifre (tekrar)" /><EditText android:id="@+id/new_password2" style="@style/Input" android:inputType="textPassword" /></LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="end" android:orientation="horizontal" android:paddingHorizontal="10dp" android:paddingTop="6dp">
+                        <Button android:id="@+id/password_save" style="@style/BtnGhost" android:layout_marginEnd="0dp" android:text="ŞİFREYİ DEĞİŞTİR" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
-            <TextView style="@style/SectionTitle" android:text="YÖNETİCİ ŞİFRESİ" />
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Yeni şifre" /><EditText android:id="@+id/new_password" style="@style/RowEdit" android:inputType="textPassword" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Yeni şifre (tekrar)" /><EditText android:id="@+id/new_password2" style="@style/RowEdit" android:inputType="textPassword" /></LinearLayout>
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp">
-                <Button android:id="@+id/password_save" style="@style/BtnGhost" android:text="ŞİFREYİ DEĞİŞTİR" />
-                <Button android:id="@+id/settings_logout" style="@style/BtnGhost" android:text="KİLİTLE" />
-            </LinearLayout>
+            <!-- Sag sutun: K9 uzak ayarlari + kiosk -->
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="8dp">
+                    <LinearLayout style="@style/CardHeader"><View style="@style/CardHeaderMark" /><TextView style="@style/CardHeaderText" android:text="K9 AYARLARI" /><Button android:id="@+id/k9_read" style="@style/BtnGhost" android:layout_height="32dp" android:text="OKU" /><Button android:id="@+id/k9_apply" style="@style/BtnPrimary" android:layout_height="32dp" android:layout_marginEnd="0dp" android:text="UYGULA" /></LinearLayout>
+                    <TextView android:id="@+id/k9_status" style="@style/TileSub" android:layout_width="match_parent" android:paddingHorizontal="12dp" android:paddingBottom="4dp" android:text="K9'dan okunmadı" />
+                    <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Kamera genişlik" /><EditText android:id="@+id/k9_cameraWidth" style="@style/Input" android:inputType="number" /></LinearLayout>
+                    <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Kamera yükseklik" /><EditText android:id="@+id/k9_cameraHeight" style="@style/Input" android:inputType="number" /></LinearLayout>
+                    <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Kamera fps" /><EditText android:id="@+id/k9_cameraFps" style="@style/Input" android:inputType="number" /></LinearLayout>
+                    <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Yayın genişlik" /><EditText android:id="@+id/k9_outputWidth" style="@style/Input" android:inputType="number" /></LinearLayout>
+                    <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Yayın yükseklik" /><EditText android:id="@+id/k9_outputHeight" style="@style/Input" android:inputType="number" /></LinearLayout>
+                    <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Yayın fps" /><EditText android:id="@+id/k9_outputFps" style="@style/Input" android:inputType="number" /></LinearLayout>
+                    <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Link zaman aşımı (s)" /><EditText android:id="@+id/k9_linkTimeoutSec" style="@style/Input" android:inputType="numberDecimal" /></LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="end" android:orientation="horizontal" android:paddingHorizontal="10dp" android:paddingTop="6dp">
+                        <Button android:id="@+id/k9_reset" style="@style/BtnGhost" android:layout_marginEnd="0dp" android:text="FABRİKA DEĞERLERİ" />
+                    </LinearLayout>
+                </LinearLayout>
 
-            <TextView style="@style/SectionTitle" android:text="KİOSK" />
-            <TextView android:id="@+id/kiosk_state" style="@style/RowValue" android:layout_width="match_parent" android:paddingHorizontal="10dp" android:text="-" android:textColor="@color/text_dim" android:textSize="12sp" />
-            <LinearLayout style="@style/RowAlt">
-                <TextView style="@style/RowLabel" android:text="@string/pin_hint" />
-                <EditText android:id="@+id/kiosk_pin" style="@style/RowEdit" android:inputType="numberPassword" />
-            </LinearLayout>
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp">
-                <Button android:id="@+id/kiosk_exit" style="@style/BtnGhost" android:text="KİOSK'TAN ÇIK" />
-                <Button android:id="@+id/kiosk_enter" style="@style/BtnGhost" android:text="KİOSK'U AÇ" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="8dp">
+                    <LinearLayout style="@style/CardHeader"><View style="@style/CardHeaderMark" /><TextView style="@style/CardHeaderText" android:text="KİOSK" /></LinearLayout>
+                    <TextView android:id="@+id/kiosk_state" style="@style/TileSub" android:layout_width="match_parent" android:paddingHorizontal="12dp" android:paddingBottom="4dp" android:text="-" />
+                    <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="@string/pin_hint" /><EditText android:id="@+id/kiosk_pin" style="@style/Input" android:inputType="numberPassword" /></LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="end" android:orientation="horizontal" android:paddingHorizontal="10dp" android:paddingTop="6dp">
+                        <Button android:id="@+id/kiosk_enter" style="@style/BtnGhost" android:text="KİOSK'U AÇ" />
+                        <Button android:id="@+id/kiosk_exit" style="@style/BtnGhost" android:layout_marginEnd="0dp" android:text="KİOSK'TAN ÇIK" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-
-        <!-- Sag kart: K9 uzak ayarlari -->
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="8dp">
-            <TextView style="@style/SectionTitle" android:text="K9 AYARLARI (CİHAZDA KALICI)" />
-            <TextView android:id="@+id/k9_status" style="@style/RowValue" android:layout_width="match_parent" android:paddingHorizontal="10dp" android:text="K9'dan okunmadı" android:textColor="@color/text_dim" android:textSize="12sp" />
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="cameraWidth" /><EditText android:id="@+id/k9_cameraWidth" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="cameraHeight" /><EditText android:id="@+id/k9_cameraHeight" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="cameraFps" /><EditText android:id="@+id/k9_cameraFps" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="outputWidth" /><EditText android:id="@+id/k9_outputWidth" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="outputHeight" /><EditText android:id="@+id/k9_outputHeight" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="outputFps" /><EditText android:id="@+id/k9_outputFps" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="linkTimeoutSec" /><EditText android:id="@+id/k9_linkTimeoutSec" style="@style/RowEdit" android:inputType="numberDecimal" /></LinearLayout>
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp">
-                <Button android:id="@+id/k9_read" style="@style/BtnGhost" android:text="OKU" />
-                <Button android:id="@+id/k9_apply" style="@style/BtnPrimary" android:text="UYGULA" />
-                <Button android:id="@+id/k9_reset" style="@style/BtnGhost" android:text="FABRİKA" />
-            </LinearLayout>
-        </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
 </FrameLayout>

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Durum sayfasi: ustte 4 KPI karti (sol kenar rengi durumu soyler),
+     altta iki bilgi karti. Yenile sag ustte. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -6,29 +8,67 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="8dp">
-            <TextView style="@style/SectionTitle" android:text="BAĞLANTI" />
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Link" /><TextView android:id="@+id/st_link" style="@style/RowValue" android:text="-" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Video" /><TextView android:id="@+id/st_video" style="@style/RowValue" android:text="-" /></LinearLayout>
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="K9 adresi" /><TextView android:id="@+id/st_k9" style="@style/RowValue" android:text="-" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Bitrate kademesi" /><TextView android:id="@+id/st_bitrate" style="@style/RowValue" android:text="-" /></LinearLayout>
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Ayar kanalı" /><TextView android:id="@+id/st_config" style="@style/RowValue" android:text="-" /></LinearLayout>
-            <TextView style="@style/SectionTitle" android:text="K9 AYARLARI (CİHAZDAN OKUNAN)" />
-            <TextView android:id="@+id/st_k9_values" style="@style/RowValue" android:layout_width="match_parent" android:paddingHorizontal="10dp" android:text="-" android:textSize="12sp" />
+        android:orientation="vertical">
+
+        <!-- Baslik satiri -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:paddingBottom="8dp">
+            <View style="@style/CardHeaderMark" />
+            <TextView style="@style/CardHeaderText" android:text="SİSTEM DURUMU" />
+            <TextView android:id="@+id/st_updated" style="@style/TileSub" android:layout_marginEnd="10dp" android:text="" />
+            <Button android:id="@+id/st_refresh" style="@style/BtnGhost" android:layout_marginEnd="0dp" android:text="YENİLE" />
         </LinearLayout>
-        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="8dp">
-            <TextView style="@style/SectionTitle" android:text="KONTROL BİRİMİ (UKB)" />
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Pil" /><TextView android:id="@+id/st_battery" style="@style/RowValue" android:text="-" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="GPS" /><TextView android:id="@+id/st_gps" style="@style/RowValue" android:text="-" /></LinearLayout>
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="MGRS" /><TextView android:id="@+id/st_mgrs" style="@style/RowValue" android:text="-" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Kiosk" /><TextView android:id="@+id/st_kiosk" style="@style/RowValue" android:text="-" /></LinearLayout>
-            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Depolama" /><TextView android:id="@+id/st_disk" style="@style/RowValue" android:text="-" /></LinearLayout>
-            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Uygulama" /><TextView android:id="@+id/st_version" style="@style/RowValue" android:text="-" /></LinearLayout>
-            <TextView style="@style/SectionTitle" android:text="HARİTA KAYNAĞI" />
-            <TextView android:id="@+id/st_map" style="@style/RowValue" android:layout_width="match_parent" android:paddingHorizontal="10dp" android:text="-" android:textSize="11sp" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp">
-                <Button android:id="@+id/st_refresh" style="@style/BtnGhost" android:text="YENİLE" />
+
+        <!-- KPI kartlari -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <LinearLayout style="@style/Tile">
+                <View android:id="@+id/tile_link_mark" style="@style/TileAccent" />
+                <LinearLayout style="@style/TileBody">
+                    <TextView style="@style/TileTitle" android:text="LINK" />
+                    <TextView android:id="@+id/st_link" style="@style/TileValue" android:text="-" />
+                    <TextView android:id="@+id/st_link_sub" style="@style/TileSub" android:text="-" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout style="@style/Tile">
+                <View android:id="@+id/tile_video_mark" style="@style/TileAccent" />
+                <LinearLayout style="@style/TileBody">
+                    <TextView style="@style/TileTitle" android:text="VİDEO" />
+                    <TextView android:id="@+id/st_video" style="@style/TileValue" android:text="-" />
+                    <TextView android:id="@+id/st_bitrate" style="@style/TileSub" android:text="-" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout style="@style/Tile">
+                <View android:id="@+id/tile_k9_mark" style="@style/TileAccent" />
+                <LinearLayout style="@style/TileBody">
+                    <TextView style="@style/TileTitle" android:text="K9" />
+                    <TextView android:id="@+id/st_k9" style="@style/TileValue" android:textSize="16sp" android:text="-" />
+                    <TextView android:id="@+id/st_config" style="@style/TileSub" android:text="-" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout style="@style/Tile" android:layout_marginEnd="0dp">
+                <View android:id="@+id/tile_ukb_mark" style="@style/TileAccent" />
+                <LinearLayout style="@style/TileBody">
+                    <TextView style="@style/TileTitle" android:text="KONTROL BİRİMİ" />
+                    <TextView android:id="@+id/st_battery" style="@style/TileValue" android:text="-" />
+                    <TextView android:id="@+id/st_gps" style="@style/TileSub" android:text="-" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Bilgi kartlari -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginEnd="8dp" android:layout_weight="1" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="6dp">
+                <LinearLayout style="@style/CardHeader"><View style="@style/CardHeaderMark" /><TextView style="@style/CardHeaderText" android:text="K9 AYARLARI (CİHAZDAN OKUNAN)" /></LinearLayout>
+                <LinearLayout android:id="@+id/st_k9_rows" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+                <TextView android:id="@+id/st_k9_empty" style="@style/TileSub" android:paddingHorizontal="12dp" android:paddingVertical="8dp" android:text="sorgulanıyor…" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="6dp">
+                <LinearLayout style="@style/CardHeader"><View style="@style/CardHeaderMark" /><TextView style="@style/CardHeaderText" android:text="KONTROL BİRİMİ" /></LinearLayout>
+                <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="GPS" /><TextView android:id="@+id/st_gps_full" style="@style/RowValue" android:text="-" /></LinearLayout>
+                <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="MGRS" /><TextView android:id="@+id/st_mgrs" style="@style/RowValue" android:text="-" /></LinearLayout>
+                <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Kiosk" /><TextView android:id="@+id/st_kiosk" style="@style/RowValue" android:text="-" /></LinearLayout>
+                <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Depolama" /><TextView android:id="@+id/st_disk" style="@style/RowValue" android:text="-" /></LinearLayout>
+                <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Harita" /><TextView android:id="@+id/st_map" style="@style/RowValue" android:layout_width="0dp" android:layout_weight="1.6" android:ellipsize="start" android:gravity="end" android:singleLine="true" android:text="-" android:textSize="11sp" /></LinearLayout>
+                <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Uygulama" /><TextView android:id="@+id/st_version" style="@style/RowValue" android:text="-" /></LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

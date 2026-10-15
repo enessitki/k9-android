@@ -28,30 +28,115 @@
     <!-- Sag fonksiyon satiri (iki sutunda ayni yukseklik) -->
     <style name="FnRow">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">58dp</item>
+        <item name="android:layout_height">56dp</item>
     </style>
     <!-- Sag fonksiyon ana ikonu -->
     <style name="FnIcon">
-        <item name="android:layout_width">46dp</item>
-        <item name="android:layout_height">46dp</item>
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:scaleType">centerInside</item>
         <item name="android:backgroundTint">@color/white</item>
-        <item name="android:translationZ">1dp</item>
     </style>
-    <!-- Expand (panel ac/kapa) dugmesi: eski projedeki baseline_menu_open_24 + layout_bg -->
+    <!-- Expand (panel ac/kapa): ikona bitisik, sutunun sag kenarinda -->
     <style name="ExpandBtn">
-        <item name="android:layout_width">36dp</item>
-        <item name="android:layout_height">36dp</item>
-        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_width">26dp</item>
+        <item name="android:layout_height">26dp</item>
+        <item name="android:layout_gravity">end|center_vertical</item>
         <item name="android:foreground">@drawable/baseline_menu_open_24</item>
-        <item name="android:background">@drawable/layout_bg</item>
-        <item name="android:translationZ">2dp</item>
+        <item name="android:foregroundTint">@color/nav_label_idle</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+    <!-- Metin girisi: yuvarlatilmis koyu kutu -->
+    <style name="Input">
+        <item name="android:layout_width">140dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:background">@drawable/bg_input</item>
+        <item name="android:paddingHorizontal">10dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">@color/text_dim</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center_vertical|end</item>
+    </style>
+    <!-- Durum sayfasi KPI karti -->
+    <style name="Tile">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:background">@drawable/card_background_dark</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+    <style name="TileAccent">
+        <item name="android:layout_width">3dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@color/nav_label_idle</item>
+    </style>
+    <style name="TileBody">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">10dp</item>
+    </style>
+    <style name="TileTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_dim</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.12</item>
+    </style>
+    <style name="TileValue">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="TileSub">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:textColor">@color/nav_label_idle</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">monospace</item>
+    </style>
+    <!-- Kart baslik satiri -->
+    <style name="CardHeader">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">6dp</item>
+    </style>
+    <style name="CardHeaderMark">
+        <item name="android:layout_width">3dp</item>
+        <item name="android:layout_height">14dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:background">@color/accent_cyan</item>
+    </style>
+    <style name="CardHeaderText">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.05</item>
     </style>
     <!-- Yan panel kart satirlari -->
     <style name="Row">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_height">44dp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:paddingHorizontal">10dp</item>
@@ -63,9 +148,8 @@
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#E6E6E6</item>
+        <item name="android:textSize">13sp</item>
     </style>
     <style name="RowValue">
         <item name="android:layout_width">wrap_content</item>
@@ -122,6 +206,10 @@
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:layout_marginEnd">6dp</item>
+        <item name="android:paddingHorizontal">4dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:singleLine">true</item>
     </style>
     <style name="Chip">
         <item name="android:layout_width">wrap_content</item>
