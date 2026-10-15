@@ -215,7 +215,7 @@ static gboolean build_audio (NativeData *d) {
     gchar *rx = g_strdup_printf (
         "udpsrc port=%d caps=\"application/x-rtp,media=audio,clock-rate=48000,encoding-name=OPUS,payload=96\" ! "
         "rtpjitterbuffer latency=60 do-lost=true ! rtpopusdepay ! opusdec plc=true use-inband-fec=true ! "
-        "audioconvert ! audioresample ! openslessink sync=false buffer-time=60000 latency-time=20000",
+        "audioconvert ! audioresample ! openslessink sync=false buffer-time=100000",
         d->audio_rx_port);
     d->audio_rx = gst_parse_launch (rx, &err); g_free (rx);
     if (err) { LOGE ("audio_rx kurulamadi: %s", err->message); g_clear_error (&err); if (d->audio_rx) { gst_object_unref (d->audio_rx); d->audio_rx = NULL; } }
