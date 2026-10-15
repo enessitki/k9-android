@@ -50,6 +50,7 @@
             <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Ses alma portu" /><EditText android:id="@+id/set_audio_rx_port" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
             <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Ses gönderme portu" /><EditText android:id="@+id/set_audio_tx_port" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
             <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Jitter buffer (ms)" /><EditText android:id="@+id/set_jitter" style="@style/RowEdit" android:inputType="number" /></LinearLayout>
+            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Yazılım decoder (donanım bozuksa)" /><Switch android:id="@+id/set_sw_decoder" style="@style/SwitchK9" /></LinearLayout>
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp">
                 <Button android:id="@+id/set_save" style="@style/BtnPrimary" android:text="KAYDET VE UYGULA" />
             </LinearLayout>

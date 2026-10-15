@@ -10,13 +10,15 @@ public final class Settings {
 
     public Settings(Context ctx) { sp = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE); }
 
-    public String k9Ip()        { return sp.getString("k9Ip", "192.168.2.10"); }
+    public String k9Ip()        { return sp.getString("k9Ip", "192.168.2.199"); }
     public int controlPort()    { return sp.getInt("controlPort", 5005); }   // K9 selfPort
     public int configPort()     { return sp.getInt("configPort", 5006); }    // K9 configPort
     public int videoPort()      { return sp.getInt("videoPort", 5001); }     // K9 ukbVideoSendPort
     public int audioRxPort()    { return sp.getInt("audioRxPort", 14551); }  // K9 ukbAudioSendPort
     public int audioTxPort()    { return sp.getInt("audioTxPort", 14552); }  // K9 ukbAudioReceivePort
     public int jitterMs()       { return sp.getInt("jitterMs", 80); }
+    /** Donanim decoder (amcvideodec) sorunluysa avdec_h265. */
+    public boolean swDecoder()  { return sp.getBoolean("swDecoder", false); }
     public String kioskPin()    { return sp.getString("kioskPin", "1453"); }
     public boolean kioskEnabled() { return sp.getBoolean("kiosk", true); }
     /** Ayarlar sayfasi girisi (eski uygulamadaki yonetici sifresinin karsiligi). */
@@ -29,6 +31,7 @@ public final class Settings {
     public void setAudioRxPort(int v)    { sp.edit().putInt("audioRxPort", v).apply(); }
     public void setAudioTxPort(int v)    { sp.edit().putInt("audioTxPort", v).apply(); }
     public void setJitterMs(int v)       { sp.edit().putInt("jitterMs", v).apply(); }
+    public void setSwDecoder(boolean v)  { sp.edit().putBoolean("swDecoder", v).apply(); }
     public void setKioskPin(String v)    { sp.edit().putString("kioskPin", v).apply(); }
     public void setKioskEnabled(boolean v) { sp.edit().putBoolean("kiosk", v).apply(); }
     public void setAdminPassword(String v) { sp.edit().putString("adminPassword", v).apply(); }
