@@ -14,7 +14,7 @@
             <Switch android:id="@+id/speaker_switch" style="@style/SwitchK9" />
         </LinearLayout>
         <LinearLayout style="@style/Row">
-            <TextView style="@style/RowLabel" android:text="Gürültü azaltma (RNNoise)" />
+            <TextView style="@style/RowLabel" android:text="Gürültü azaltma" />
             <Switch android:id="@+id/noise_switch" style="@style/SwitchK9" />
         </LinearLayout>
         <LinearLayout style="@style/RowAlt">

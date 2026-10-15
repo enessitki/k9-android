@@ -49,15 +49,14 @@ public final class StatusPage {
         updated.setText("son: " + fmt.format(new Date()));
         boolean up = a.linkUp();
         link.setText(up ? "BAĞLI" : "YOK"); link.setTextColor(a.getColor(up ? R.color.ok : R.color.bad));
-        linkSub.setText(a.settings.k9Ip());
+        linkSub.setText(up ? "video alınıyor" : "K9'dan görüntü gelmiyor");
         mark(linkMark, up ? R.color.ok : R.color.bad);
 
         video.setText(a.lastW > 0 ? a.lastW + "x" + a.lastH : "-");
-        bitrate.setText((a.lastFps > 0 ? a.lastFps + " fps · " : "") + "kademe " + a.control.bitrate());
+        bitrate.setText((a.lastFps > 0 ? a.lastFps + " fps · " : "") + "kalite " + a.control.bitrate() + "/4");
         mark(videoMark, a.lastFps > 0 ? R.color.ok : R.color.nav_label_idle);
 
-        k9.setText(a.settings.k9Ip());
-        config.setText("ayar kanalı sorgulanıyor…"); mark(k9Mark, R.color.nav_label_idle);
+        k9.setText("…"); config.setText("ayarlar sorgulanıyor"); mark(k9Mark, R.color.nav_label_idle);
 
         int pct = a.topBar.batteryPct;
         battery.setText(pct >= 0 ? "%" + pct + (a.topBar.charging ? " ⚡" : "") : "-");
@@ -69,21 +68,37 @@ public final class StatusPage {
         kiosk.setText(Kiosk.isDeviceOwner(a) ? "cihaz sahibi (tam)" : (Kiosk.isLocked(a) ? "ekran sabitleme" : "kapalı"));
         File dir = a.getExternalFilesDir(null);
         if (dir != null) { StatFs st = new StatFs(dir.getAbsolutePath()); disk.setText(String.format(Locale.US, "%.1f / %.1f GB boş", st.getAvailableBytes() / 1073741824.0, st.getTotalBytes() / 1073741824.0)); }
-        map.setText(a.mapCtl.isOffline() ? "çevrimdışı" : "ÇEVRİMİÇİ (dosya yok)");
+        map.setText(a.mapCtl.isOffline() ? "çevrimdışı harita" : "çevrimdışı harita yok");
         map.setTextColor(a.getColor(a.mapCtl.isOffline() ? R.color.ok : R.color.warn));
         version.setText(BuildConfig.VERSION_NAME);
 
         a.config.get(new ConfigClient.Callback() {
             @Override public void onReply(JSONObject r) {
-                config.setText("ayar kanalı OK" + (r.optBoolean("override") ? " · override" : " · fabrika"));
+                k9.setText("HAZIR");
+                config.setText(r.optBoolean("override") ? "özel ayarlar aktif" : "fabrika ayarları");
                 mark(k9Mark, R.color.ok);
                 fillRows(r.optJSONObject("values"));
             }
             @Override public void onFailure(String why) {
-                config.setText("ayar kanalı yanıt vermiyor"); mark(k9Mark, R.color.bad);
-                k9Rows.removeAllViews(); k9Empty.setVisibility(View.VISIBLE); k9Empty.setText("K9'a ulaşılamadı: " + why);
+                k9.setText("ULAŞILAMIYOR"); config.setText("ayar isteğine yanıt yok"); mark(k9Mark, R.color.bad);
+                k9Rows.removeAllViews(); k9Empty.setVisibility(View.VISIBLE); k9Empty.setText("K9'a ulaşılamadı");
             }
         });
+    }
+
+    /** K9 ayar anahtarlari -> kullanicinin gorecegi Turkce etiket */
+    private static String turkish(String key) {
+        switch (key) {
+            case "cameraWidth": return "Kamera genişlik";
+            case "cameraHeight": return "Kamera yükseklik";
+            case "cameraFps": return "Kamera kare hızı";
+            case "cameraIoMode": return "Kamera giriş modu";
+            case "outputWidth": return "Yayın genişlik";
+            case "outputHeight": return "Yayın yükseklik";
+            case "outputFps": return "Yayın kare hızı";
+            case "linkTimeoutSec": return "Bağlantı zaman aşımı (s)";
+            default: return key;
+        }
     }
 
     private void fillRows(JSONObject v) {
@@ -102,7 +117,7 @@ public final class StatusPage {
             if (i % 2 == 0) row.setBackgroundResource(R.drawable.row_background_alt);
             TextView label = new TextView(a, null, 0, R.style.RowLabel);
             label.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-            label.setText(key);
+            label.setText(turkish(key));
             TextView value = new TextView(a, null, 0, R.style.RowValue);
             value.setText(String.valueOf(v.opt(key)));
             row.addView(label); row.addView(value);

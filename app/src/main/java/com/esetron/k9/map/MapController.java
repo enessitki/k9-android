@@ -112,8 +112,8 @@ public final class MapController implements LocationListener {
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setUseDataConnection(true);
         offline = false;
-        sourceInfo = "ÇEVRİMİÇİ (harita dosyası yok). Kopyalayın: " + (base != null ? base.getAbsolutePath() : "Android/data/com.esetron.k9/files/osmdroid") + "/map.sqlite";
-        Log.w(TAG, sourceInfo);
+        sourceInfo = "çevrimdışı harita dosyası yok";
+        Log.w(TAG, "Harita arsivi bulunamadi; beklenen yer: " + (base != null ? base.getAbsolutePath() : "?") + "/map.sqlite");
     }
 
     /** APK ile assets/map.sqlite geldiyse ilk acilista uygulama dizinine kopyala (eski FileUtils). */
@@ -137,7 +137,7 @@ public final class MapController implements LocationListener {
 
     /** Harita acilinca: dosya yoksa kullaniciya soyle (sessizce cevrimici kalmasin). */
     public void checkSource() {
-        if (!offline && listener != null) listener.onMapMessage(sourceInfo);
+        if (!offline && listener != null) listener.onMapMessage("Çevrimdışı harita dosyası bulunamadı, çevrimiçi harita kullanılıyor");
     }
 
     public void setListener(Listener l) { listener = l; }

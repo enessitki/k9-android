@@ -5,8 +5,8 @@
     <string name="nav_record">KAYIT</string>
     <string name="nav_status">DURUM</string>
     <string name="nav_settings">AYARLAR</string>
-    <string name="link_up">LINK</string>
-    <string name="link_down">LINK YOK</string>
+    <string name="link_up">BAĞLI</string>
+    <string name="link_down">BAĞLANTI YOK</string>
     <string name="gps_wait">GPS konumu alınıyor…</string>
     <string name="device_admin_desc">K9 kiosk modu için cihaz yöneticisi</string>
     <string name="exit_confirm">Uygulamadan çıkmak istediğinize emin misiniz?</string>

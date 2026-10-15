@@ -23,7 +23,7 @@
             <LinearLayout style="@style/Tile">
                 <View android:id="@+id/tile_link_mark" style="@style/TileAccent" />
                 <LinearLayout style="@style/TileBody">
-                    <TextView style="@style/TileTitle" android:text="LINK" />
+                    <TextView style="@style/TileTitle" android:text="BAĞLANTI" />
                     <TextView android:id="@+id/st_link" style="@style/TileValue" android:text="-" />
                     <TextView android:id="@+id/st_link_sub" style="@style/TileSub" android:text="-" />
                 </LinearLayout>
@@ -57,7 +57,7 @@
         <!-- Bilgi kartlari -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginEnd="8dp" android:layout_weight="1" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="6dp">
-                <LinearLayout style="@style/CardHeader"><View style="@style/CardHeaderMark" /><TextView style="@style/CardHeaderText" android:text="K9 AYARLARI (CİHAZDAN OKUNAN)" /></LinearLayout>
+                <LinearLayout style="@style/CardHeader"><View style="@style/CardHeaderMark" /><TextView style="@style/CardHeaderText" android:text="K9 AYARLARI" /></LinearLayout>
                 <LinearLayout android:id="@+id/st_k9_rows" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
                 <TextView android:id="@+id/st_k9_empty" style="@style/TileSub" android:paddingHorizontal="12dp" android:paddingVertical="8dp" android:text="sorgulanıyor…" />
             </LinearLayout>

@@ -53,7 +53,7 @@ public final class RightBar {
         for (int i = 0; i < panels.length; i++) { final int k = i; expands[i].setOnClickListener(v -> togglePanel(k)); }
 
         // --- bitrate: ana ikon kademe dondurur, panelde dogrudan secim ---
-        btnBitrate.setOnClickListener(v -> { a.control.setBitrate(a.control.bitrate() % 4 + 1); highlightBitrate(); a.showMessage("Bitrate kademe " + a.control.bitrate()); });
+        btnBitrate.setOnClickListener(v -> { a.control.setBitrate(a.control.bitrate() % 4 + 1); highlightBitrate(); a.showMessage("Video kalitesi: " + a.control.bitrate() + "/4"); });
         int[] ids = {R.id.br1, R.id.br2, R.id.br3, R.id.br4};
         for (int i = 0; i < 4; i++) { final int level = i + 1; br[i] = a.findViewById(ids[i]); br[i].setOnClickListener(v -> { a.control.setBitrate(level); highlightBitrate(); }); }
         highlightBitrate();
@@ -85,7 +85,7 @@ public final class RightBar {
         ((Switch) a.findViewById(R.id.screen_record_switch)).setOnCheckedChangeListener((b, on) -> { if (b.isPressed()) a.toggleRecording(on); });
         a.findViewById(R.id.screenshot_button).setOnClickListener(v -> {
             closePanels();
-            a.screenshot.take(a, a.video, (ok, name) -> a.showMessage(ok ? "Kaydedildi: Pictures/K9/" + name : "Ekran görüntüsü alınamadı"));
+            a.screenshot.take(a, a.video, ok -> a.showMessage(ok ? "Ekran görüntüsü kaydedildi" : "Ekran görüntüsü alınamadı"));
         });
 
         // --- ses: ana ikon K9 hoparloru ac/kapa; panelde gurultu azaltma, dinleme ---
@@ -170,7 +170,7 @@ public final class RightBar {
         boolean on = CaptureService.recording.get();
         Switch sw = a.findViewById(R.id.screen_record_switch);
         if (sw.isChecked() != on && !sw.isPressed()) sw.setChecked(on);
-        recordState.setText(on ? "Kayıt sürüyor → Movies/K9" : "Kayıt yok");
+        recordState.setText(on ? "Ekran kaydı sürüyor" : "Kayıt yok");
         recordState.setTextColor(a.getColor(on ? R.color.bad : R.color.text_dim));
         tint(btnRecord, on ? red : white);
     }
