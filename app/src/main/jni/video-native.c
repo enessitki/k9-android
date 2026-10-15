@@ -55,7 +55,6 @@ typedef struct {
     /* ayarlar (context thread okur; JNI tarafi kuyruklayarak degistirir) */
     gchar        *host;                /* K9 IP */
     gint          video_port, audio_rx_port, audio_tx_port, latency_ms;
-    gboolean      sw_decoder;          /* avdec_h265'e zorla (donanim decoder bozuksa) */
     gboolean      running;             /* kullanici "baslat" dedi mi */
     gboolean      listen;              /* K9 sesi dinleniyor mu */
 } NativeData;
@@ -109,29 +108,6 @@ static void run_on_context_sync (NativeData *d, GSourceFunc fn, gpointer ud) {
     g_mutex_clear (&r.m); g_cond_clear (&r.c);
 }
 
-/* ------------------------------------------------------ decoder secimi */
-/* Cihazin donanim H.265 decoder'i (amcviddec-*), yoksa yazilim avdec_h265.
- * Registry'den caps'e gore suzulur; isim cihazdan cihaza degisir. */
-static gchar *pick_h265_decoder (gboolean force_sw) {
-    if (force_sw) { LOGI ("H265 decoder: avdec_h265 (yazilim, ayarlardan zorlandi)"); return g_strdup ("avdec_h265"); }
-    GstCaps *caps = gst_caps_from_string ("video/x-h265, stream-format=(string)byte-stream, alignment=(string)au");
-    GList *all = gst_element_factory_list_get_elements (GST_ELEMENT_FACTORY_TYPE_DECODER | GST_ELEMENT_FACTORY_TYPE_MEDIA_VIDEO, GST_RANK_MARGINAL);
-    GList *ok = gst_element_factory_list_filter (all, caps, GST_PAD_SINK, FALSE);
-    gchar *best = NULL; gint best_rank = -1;
-    for (GList *l = ok; l; l = l->next) {
-        GstElementFactory *f = l->data;
-        const gchar *name = gst_plugin_feature_get_name (GST_PLUGIN_FEATURE (f));
-        gint rank = gst_plugin_feature_get_rank (GST_PLUGIN_FEATURE (f));
-        if (g_str_has_prefix (name, "amcviddec")) rank += 10000;    /* donanim her zaman once */
-        LOGI ("H265 decoder adayi: %s (rank %d)", name, rank);
-        if (rank > best_rank) { best_rank = rank; g_free (best); best = g_strdup (name); }
-    }
-    gst_plugin_feature_list_free (ok); gst_plugin_feature_list_free (all); gst_caps_unref (caps);
-    if (!best) best = g_strdup ("avdec_h265");
-    LOGI ("H265 decoder: %s", best);
-    return best;
-}
-
 /* -------------------------------------------------------------- video */
 static void schedule_video_rebuild (NativeData *d);
 
@@ -165,25 +141,17 @@ static void video_error_cb (GstBus *bus, GstMessage *msg, NativeData *d) {
 static gboolean build_video (NativeData *d) {
     VideoSlot *v = &d->video; GError *err = NULL;
     teardown_video (d);
-    gchar *dec = pick_h265_decoder (d->sw_decoder);
     g_free (v->desc);
-    /* Decoder cikisi bilerek sistem bellegi (video/x-raw, GLMemory DEGIL):
-     * amcvideodec'in GL/SurfaceTexture yolu bazi Codec2 (c2.mtk/c2.qti)
-     * surucularinde hic guncellenmeyen doku (yesil kare) ve decoder
-     * thread'inde g_assert ile cokme uretiyor. Sistem bellegi + glimagesink
-     * upload 720p30'da rahat; discard-corrupted-frames: kayip sonrasi bozuk
-     * kare ekrana basilmaz (eski projedeki bekciler). */
+    /* Bu cihazda calisan referans (tutorial-5.c) ile ayni sekil: decoder'i
+     * decodebin3 secer (donanim amcviddec), sink GL yolu. Ekstra bekci/filtre yok. */
     v->desc = g_strdup_printf (
         "udpsrc port=%d buffer-size=2097152 caps=\"application/x-rtp,media=video,clock-rate=90000,encoding-name=H265,payload=96\" ! "
-        "rtpjitterbuffer latency=%d do-lost=true drop-on-latency=true ! "
-        "rtph265depay wait-for-keyframe=true ! h265parse config-interval=-1 ! "
+        "rtpjitterbuffer latency=%d drop-on-latency=true ! "
+        "rtph265depay ! h265parse config-interval=-1 ! decodebin3 ! "
         "queue max-size-buffers=2 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
-        "%s discard-corrupted-frames=true ! video/x-raw ! "
-        "queue max-size-buffers=2 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
-        "glimagesink name=vsink sync=false",
-        d->video_port, d->latency_ms, dec);
+        "glimagesink force-aspect-ratio=false name=vsink sync=false",
+        d->video_port, d->latency_ms);
     LOGI ("video pipeline: %s", v->desc);
-    g_free (dec);
     v->pipeline = gst_parse_launch (v->desc, &err);
     if (err || !v->pipeline) {
         gchar *m = g_strdup_printf ("Video pipeline kurulamadi: %s", err ? err->message : "?");
@@ -313,14 +281,14 @@ static void *app_function (void *ud) {
 }
 
 /* ------------------------------------------------- kuyruklanan isler */
-typedef struct { NativeData *d; gchar *host; gint vport, arx, atx, lat; gboolean sw; } ConfigReq;
+typedef struct { NativeData *d; gchar *host; gint vport, arx, atx, lat; } ConfigReq;
 static void config_req_free (gpointer p) { ConfigReq *r = p; g_free (r->host); g_free (r); }
 static gboolean configure_cb (gpointer p) {
     ConfigReq *r = p; NativeData *d = r->d;
     gboolean changed = g_strcmp0 (d->host, r->host) != 0 || d->video_port != r->vport || d->audio_rx_port != r->arx ||
-                       d->audio_tx_port != r->atx || d->latency_ms != r->lat || d->sw_decoder != r->sw;
+                       d->audio_tx_port != r->atx || d->latency_ms != r->lat;
     g_free (d->host); d->host = g_strdup (r->host);
-    d->video_port = r->vport; d->audio_rx_port = r->arx; d->audio_tx_port = r->atx; d->latency_ms = r->lat; d->sw_decoder = r->sw;
+    d->video_port = r->vport; d->audio_rx_port = r->arx; d->audio_tx_port = r->atx; d->latency_ms = r->lat;
     if (changed) {
         build_audio (d);
         if (d->running) { set_audio_state (d, GST_STATE_PLAYING); teardown_video (d); start_video (d); }
@@ -387,7 +355,7 @@ static void n_init (JNIEnv *env, jobject thiz) {
     NativeData *d = g_new0 (NativeData, 1);
     d->app = (*env)->NewGlobalRef (env, thiz);
     d->listen = TRUE;
-    d->host = g_strdup ("192.168.2.199"); d->video_port = 5001; d->audio_rx_port = 14551; d->audio_tx_port = 14552; d->latency_ms = 80;
+    d->host = g_strdup ("192.168.2.199"); d->video_port = 5001; d->audio_rx_port = 14551; d->audio_tx_port = 14552; d->latency_ms = 200;
     d->context = g_main_context_new ();
     d->main_loop = g_main_loop_new (d->context, FALSE);
     SET_DATA (env, thiz, d);
@@ -406,11 +374,11 @@ static void n_finalize (JNIEnv *env, jobject thiz) {
     SET_DATA (env, thiz, NULL);
 }
 
-static void n_configure (JNIEnv *env, jobject thiz, jstring host, jint vport, jint arx, jint atx, jint lat, jboolean sw) {
+static void n_configure (JNIEnv *env, jobject thiz, jstring host, jint vport, jint arx, jint atx, jint lat) {
     NativeData *d = GET_DATA (env, thiz); if (!d || !d->context || !host) return;
     const char *h = (*env)->GetStringUTFChars (env, host, NULL); if (!h) return;
     ConfigReq *r = g_new0 (ConfigReq, 1);
-    r->d = d; r->host = g_strdup (h); r->vport = vport; r->arx = arx; r->atx = atx; r->lat = lat; r->sw = sw;
+    r->d = d; r->host = g_strdup (h); r->vport = vport; r->arx = arx; r->atx = atx; r->lat = lat;
     (*env)->ReleaseStringUTFChars (env, host, h);
     queue_on_context (d, configure_cb, r, config_req_free);
 }
@@ -451,7 +419,7 @@ static JNINativeMethod methods[] = {
     { "nativeClassInit", "()Z", (void *) n_class_init },
     { "nativeInit", "()V", (void *) n_init },
     { "nativeFinalize", "()V", (void *) n_finalize },
-    { "nativeConfigure", "(Ljava/lang/String;IIIIZ)V", (void *) n_configure },
+    { "nativeConfigure", "(Ljava/lang/String;IIII)V", (void *) n_configure },
     { "nativeStart", "()V", (void *) n_start },
     { "nativeStop", "()V", (void *) n_stop },
     { "nativeSurfaceSet", "(Ljava/lang/Object;)V", (void *) n_surface_set },

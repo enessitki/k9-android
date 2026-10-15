@@ -30,7 +30,7 @@ public final class NativeBridge {
     private static native boolean nativeClassInit();
     private native void nativeInit();
     private native void nativeFinalize();
-    private native void nativeConfigure(String host, int videoPort, int audioRxPort, int audioTxPort, int latencyMs, boolean swDecoder);
+    private native void nativeConfigure(String host, int videoPort, int audioRxPort, int audioTxPort, int latencyMs);
     private native void nativeStart();
     private native void nativeStop();
     private native void nativeSurfaceSet(Object surface);
@@ -66,8 +66,8 @@ public final class NativeBridge {
         initialized = false;
     }
 
-    public void configure(String host, int videoPort, int audioRxPort, int audioTxPort, int latencyMs, boolean swDecoder) {
-        if (initialized) nativeConfigure(host, videoPort, audioRxPort, audioTxPort, latencyMs, swDecoder);
+    public void configure(String host, int videoPort, int audioRxPort, int audioTxPort, int latencyMs) {
+        if (initialized) nativeConfigure(host, videoPort, audioRxPort, audioTxPort, latencyMs);
     }
     public void start() { if (initialized) nativeStart(); }
     public void stop() { if (initialized) nativeStop(); }

@@ -3,7 +3,6 @@ package com.esetron.k9.ui;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.esetron.k9.MainActivity;
@@ -27,14 +26,13 @@ public final class SettingsPage {
     private final TextView kioskState, k9Status, loginWarning;
     private final View lock, content;
     private final EditText password, newPassword, newPassword2;
-    private final Switch swDecoder;
     private final Map<String, EditText> k9Fields = new HashMap<>();
 
     public SettingsPage(MainActivity a) {
         this.a = a; this.s = a.settings;
         ip = a.findViewById(R.id.set_ip); controlPort = a.findViewById(R.id.set_control_port); configPort = a.findViewById(R.id.set_config_port);
         videoPort = a.findViewById(R.id.set_video_port); audioRxPort = a.findViewById(R.id.set_audio_rx_port); audioTxPort = a.findViewById(R.id.set_audio_tx_port);
-        jitter = a.findViewById(R.id.set_jitter); swDecoder = a.findViewById(R.id.set_sw_decoder); kioskPin = a.findViewById(R.id.kiosk_pin); kioskState = a.findViewById(R.id.kiosk_state); k9Status = a.findViewById(R.id.k9_status);
+        jitter = a.findViewById(R.id.set_jitter); kioskPin = a.findViewById(R.id.kiosk_pin); kioskState = a.findViewById(R.id.kiosk_state); k9Status = a.findViewById(R.id.k9_status);
         int[] ids = {R.id.k9_cameraWidth, R.id.k9_cameraHeight, R.id.k9_cameraFps, R.id.k9_outputWidth, R.id.k9_outputHeight, R.id.k9_outputFps, R.id.k9_linkTimeoutSec};
         for (int i = 0; i < K9_KEYS.length; i++) k9Fields.put(K9_KEYS[i], a.findViewById(ids[i]));
 
@@ -88,7 +86,6 @@ public final class SettingsPage {
         ip.setText(s.k9Ip()); controlPort.setText(String.valueOf(s.controlPort())); configPort.setText(String.valueOf(s.configPort()));
         videoPort.setText(String.valueOf(s.videoPort())); audioRxPort.setText(String.valueOf(s.audioRxPort()));
         audioTxPort.setText(String.valueOf(s.audioTxPort())); jitter.setText(String.valueOf(s.jitterMs()));
-        swDecoder.setChecked(s.swDecoder());
         kioskState.setText((Kiosk.isDeviceOwner(a) ? "Cihaz sahibi: TAM kiosk" : "Cihaz sahibi değil: ekran sabitleme. Tam kiosk: adb shell dpm set-device-owner com.esetron.k9/.kiosk.KioskAdminReceiver")
                 + (s.kioskEnabled() ? " — aktif" : " — kapalı"));
         read();
@@ -99,7 +96,6 @@ public final class SettingsPage {
         s.setControlPort(num(controlPort, s.controlPort())); s.setConfigPort(num(configPort, s.configPort()));
         s.setVideoPort(num(videoPort, s.videoPort())); s.setAudioRxPort(num(audioRxPort, s.audioRxPort()));
         s.setAudioTxPort(num(audioTxPort, s.audioTxPort())); s.setJitterMs(num(jitter, s.jitterMs()));
-        s.setSwDecoder(swDecoder.isChecked());
         a.applySettings();
         a.showMessage("Ayarlar uygulandı");
     }

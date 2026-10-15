@@ -134,7 +134,7 @@ public final class MainActivity extends AppCompatActivity implements SurfaceHold
 
     /** Ayarlar kaydedilince: native hedefler, kontrol ve ayar kanali. */
     public void applySettings() {
-        bridge.configure(settings.k9Ip(), settings.videoPort(), settings.audioRxPort(), settings.audioTxPort(), settings.jitterMs(), settings.swDecoder());
+        bridge.configure(settings.k9Ip(), settings.videoPort(), settings.audioRxPort(), settings.audioTxPort(), settings.jitterMs());
         control.setTarget(settings.k9Ip(), settings.controlPort());
         config.setTarget(settings.k9Ip(), settings.configPort());
     }
