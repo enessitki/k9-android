@@ -34,7 +34,7 @@ public final class LeftBar {
         int[] cellIds = {R.id.nav_cell_video, R.id.nav_cell_record, R.id.nav_cell_status, R.id.nav_cell_settings};
         int[] indIds = {R.id.nav_indicator_video, R.id.nav_indicator_record, R.id.nav_indicator_status, R.id.nav_indicator_settings};
         int[] labelIds = {R.id.nav_label_video, R.id.nav_label_record, R.id.nav_label_status, R.id.nav_label_settings};
-        int[] iconIds = {R.id.page_video, R.id.page_record, R.id.page_status, R.id.page_settings};
+        int[] iconIds = {R.id.nav_icon_video, R.id.nav_icon_record, R.id.nav_icon_status, R.id.nav_icon_settings};
         for (int i = 0; i < 4; i++) {
             cells[i] = a.findViewById(cellIds[i]);
             indicators[i] = a.findViewById(indIds[i]);
