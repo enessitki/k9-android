@@ -54,8 +54,14 @@ public final class LeftBar {
     public int page() { return page; }
 
     public void select(int p) {
+        boolean wasVideo = page == PAGE_VIDEO;
         page = p;
         a.rightBar.closeAll();
+        // Eski uygulamadaki gibi: video disindaki sayfalarda video/ses pipeline'lari
+        // durur (decoder ve ag yuku yok), VIDEO'ya donunce yeniden kurulur.
+        // Kontrol paketi (heartbeat) gondermeye devam eder.
+        if (p == PAGE_VIDEO && !wasVideo) a.bridge.start();
+        else if (p != PAGE_VIDEO && wasVideo) a.bridge.stop();
         // Ust serit ve sag fonksiyon cubugu yalniz VIDEO sayfasinda (eski uygulamadaki gibi);
         // diger sayfalar sol cubuk disinda tum ekrani kullanir.
         boolean videoPage = p == PAGE_VIDEO;
