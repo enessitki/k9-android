@@ -60,4 +60,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'org.osmdroid:osmdroid-android:6.1.20'
     implementation 'mil.nga.mgrs:mgrs-android:2.2.2'
+    // Galeri oynatici (eski projedeki gibi) ve SweetAlert diyaloglari
+    implementation 'androidx.media3:media3-exoplayer:1.4.1'
+    implementation 'androidx.media3:media3-ui:1.4.1'
+    implementation 'com.github.f0ris.sweetalert:library:1.6.2'
 }

@@ -1,13 +1,14 @@
 package com.esetron.k9.ui;
 
-import android.app.AlertDialog;
 import android.text.InputType;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import com.esetron.k9.MainActivity;
 import com.esetron.k9.R;
 import com.esetron.k9.kiosk.Kiosk;
@@ -54,14 +55,12 @@ public final class LeftBar {
     public int page() { return page; }
 
     public void select(int p) {
-        boolean wasVideo = page == PAGE_VIDEO;
         page = p;
         a.rightBar.closeAll();
         // Eski uygulamadaki gibi: video disindaki sayfalarda video/ses pipeline'lari
         // durur (decoder ve ag yuku yok), VIDEO'ya donunce yeniden kurulur.
         // Kontrol paketi (heartbeat) gondermeye devam eder.
-        if (p == PAGE_VIDEO && !wasVideo) a.bridge.start();
-        else if (p != PAGE_VIDEO && wasVideo) a.bridge.stop();
+        a.setVideoPaused(p != PAGE_VIDEO);
         // Ust serit ve sag fonksiyon cubugu yalniz VIDEO sayfasinda (eski uygulamadaki gibi);
         // diger sayfalar sol cubuk disinda tum ekrani kullanir.
         boolean videoPage = p == PAGE_VIDEO;
@@ -93,18 +92,23 @@ public final class LeftBar {
         recordCount.setVisibility(n > 0 ? View.VISIBLE : View.GONE);
     }
 
-    /** Cikis: onay + kiosk PIN'i. Kiosk kapaliysa dogrudan kapatir. */
+    /** Cikis: SweetAlert onay + kiosk PIN'i (eski LeftBarActivity closeButton gibi). Kiosk kapaliysa PIN sorulmaz. */
     private void confirmExit() {
         EditText pin = new EditText(a);
         pin.setHint(R.string.pin_hint);
         pin.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-        new AlertDialog.Builder(a).setMessage(R.string.exit_confirm).setView(pin)
-                .setPositiveButton("Çık", (d, w) -> {
-                    if (!a.settings.kioskEnabled() || pin.getText().toString().equals(a.settings.kioskPin())) {
-                        if (a.settings.kioskEnabled()) Kiosk.exit(a);
-                        a.finishAndRemoveTask();
-                    } else a.showMessage("PIN yanlış");
-                })
-                .setNegativeButton("Geri", null).show();
+        pin.setGravity(Gravity.CENTER);
+        FullScreenSweetAlertDialog d = new FullScreenSweetAlertDialog(a, SweetAlertDialog.WARNING_TYPE);
+        d.setTitleText("Çıkış").setContentText(a.getString(R.string.exit_confirm)).setConfirmText("Çık").setCancelText("Geri");
+        if (a.settings.kioskEnabled()) d.setCustomView(pin);
+        d.setConfirmClickListener(dlg -> {
+            if (!a.settings.kioskEnabled() || pin.getText().toString().equals(a.settings.kioskPin())) {
+                dlg.dismissWithAnimation();
+                if (a.settings.kioskEnabled()) Kiosk.exit(a);
+                a.finishAndRemoveTask();
+            } else { pin.setText(""); dlg.setContentText("PIN yanlış"); }
+        });
+        d.setCancelClickListener(SweetAlertDialog::dismissWithAnimation);
+        d.show();
     }
 }

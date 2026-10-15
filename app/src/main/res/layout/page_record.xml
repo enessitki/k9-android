@@ -152,7 +152,14 @@
             app:cardBackgroundColor="#000000"
             app:cardCornerRadius="20dp"
             app:cardElevation="0dp">
-            <VideoView android:id="@+id/player_video" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_gravity="center" android:visibility="gone" />
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/player_video"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:resize_mode="fit"
+                app:show_buffering="when_playing"
+                app:use_controller="true" />
             <ImageView android:id="@+id/player_image" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" android:visibility="gone" android:importantForAccessibility="no" />
         </androidx.cardview.widget.CardView>
         <TextView android:id="@+id/player_title" style="@style/ChipText" android:layout_gravity="top|start" android:layout_margin="16dp" android:background="@drawable/card_background_dark" android:padding="6dp" android:text="" />

@@ -24,7 +24,8 @@ res/layout/
   left_bar.xml        VİDEO / KAYIT / DURUM / AYARLAR nav hücreleri, çıkış
   right_bar.xml       bitrate, LED, blind, harita, kayıt, hoparlör, bas-konuş
   dialog_bitrate.xml  dialog_led_blind.xml  dialog_speaker.xml  dialog_record.xml  dialog_map.xml
-  page_record.xml     disk kartı + tür filtresi/arama + kart listesi + oynatıcı (eski dialog_video_file_layout_view)
+  page_record.xml     disk kartı + tür filtresi/arama + kart listesi + ExoPlayer (media3) oynatıcı
+  page_status.xml     üç kart (BAĞLANTI / K9 AYARLARI / KONTROL BİRİMİ): üstte yuvarlak ikon, hap satırlar, renkli değerler
   page_status.xml     link, video, K9 ayarları, telefon pil/GPS/kiosk
   page_settings.xml   yönetici şifresi kapısı; bağlantı ayarları, K9 uzak ayarları, şifre değiştirme, kiosk
 app/src/main/jni/video-native.c      GStreamer: video + ses rx + PTT tx, tek context thread, hata -> backoff ile yeniden kurma
@@ -38,7 +39,8 @@ app/src/main/java/com/esetron/k9/
   net/ConfigClient.java              K9 ayar kanalı (get/set/reset)
   kiosk/                             device owner + LockTask, açılışta başlatma
   capture/CaptureService.java        ekran kaydı (MediaProjection, ön plan servisi) -> Movies/K9
-  capture/Screenshot.java            PixelCopy(video) + UI -> Pictures/K9
+  capture/Screenshot.java            PixelCopy(yalnız video yüzeyi, arayüz yok) -> Pictures/K9
+  ui/FullScreenSweetAlertDialog.java SweetAlert (onay/hata/başarı) - sistem çubukları gizli (kiosk)
   map/MapController.java             osmdroid çevrimdışı harita, telefon GPS'i, MGRS
 ```
 

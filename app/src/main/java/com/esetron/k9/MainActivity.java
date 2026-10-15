@@ -4,15 +4,19 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.projection.MediaProjectionManager;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -68,6 +72,8 @@ public final class MainActivity extends AppCompatActivity implements SurfaceHold
 
     // link / video durumu (TopBar ve StatusPage okur)
     private int noFrameSec = LINK_LOST_SEC;
+    /** Video sayfasi disinda pipeline bilerek durdurulur; kare sayaci o surede baglanti olcusu degildir. */
+    public boolean videoPaused;
     public int lastFps, lastW, lastH;
     public double selfLat, selfLon; public String selfMgrs = "-"; public boolean hasFix;
 
@@ -143,7 +149,16 @@ public final class MainActivity extends AppCompatActivity implements SurfaceHold
         config.setTarget(settings.k9Ip(), settings.configPort());
     }
 
-    public boolean linkUp() { return noFrameSec < LINK_LOST_SEC; }
+    /** Video akiyor mu (yalniz VIDEO sayfasinda anlamli; duraklatilmisken false). */
+    public boolean linkUp() { return !videoPaused && noFrameSec < LINK_LOST_SEC; }
+
+    /** Sayfa gecisi: video disinda pipeline durur, donuste yeniden kurulur (LeftBar cagirir). */
+    public void setVideoPaused(boolean paused) {
+        if (paused == videoPaused) return;
+        videoPaused = paused;
+        if (paused) { bridge.stop(); lastFps = 0; }
+        else { noFrameSec = LINK_LOST_SEC; bridge.start(); }
+    }
     public String videoText() { return lastW > 0 ? String.format(Locale.US, "%dx%d %dfps", lastW, lastH, lastFps) : "-"; }
 
     private final Runnable tick = new Runnable() {
@@ -151,6 +166,7 @@ public final class MainActivity extends AppCompatActivity implements SurfaceHold
             if (noFrameSec < 1000) noFrameSec++;
             topBar.tick();
             rightBar.refreshRecordState();
+            if (leftBar.page() == LeftBar.PAGE_STATUS) statusPage.tick();
             ui.postDelayed(this, 1000);
         }
     };
@@ -213,6 +229,25 @@ public final class MainActivity extends AppCompatActivity implements SurfaceHold
     }
 
     @Override public void onBackPressed() { /* kiosk: geri tusu kapali */ }
+
+    /** Eski uygulamadaki gibi: EditText disina dokununca klavye kapanir, odak birakilir. */
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if (v instanceof EditText) {
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int) ev.getRawX(), (int) ev.getRawY())) { hideKeyboard(v); v.clearFocus(); }
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    public void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
 
     private void hideSystemBars() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

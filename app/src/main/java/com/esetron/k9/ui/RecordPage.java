@@ -1,6 +1,5 @@
 package com.esetron.k9.ui;
 
-import android.app.AlertDialog;
 import android.content.ContentUris;
 import android.database.Cursor;
 import android.net.Uri;
@@ -15,12 +14,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.ui.PlayerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import com.esetron.k9.MainActivity;
 import com.esetron.k9.R;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -33,9 +37,9 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Kayit sayfasi (eski RecordActivity + MyVideoFileDialog karsiligi):
- * disk kullanimi karti, tur filtresi + arama, kart listesi (RecyclerView),
- * tam sayfa oynatici/goruntuleyici. Kaynak: MediaStore Movies/K9, Pictures/K9.
+ * Kayit sayfasi (eski RecordActivity + ExoVideoPlayer karsiligi): disk karti,
+ * tur filtresi + arama, kart listesi, tam sayfa oynatici (ExoPlayer, media3).
+ * Fotograflar ImageView'da gosterilir. Kaynak: MediaStore Movies/K9, Pictures/K9.
  */
 public final class RecordPage {
     private static final class Item {
@@ -45,9 +49,8 @@ public final class RecordPage {
     private enum Filter { ALL, VIDEO, PHOTO }
 
     private final MainActivity a;
-    private final RecyclerView recycler;
     private final View playerLayout, emptyText;
-    private final VideoView playerVideo;
+    private final PlayerView playerView;
     private final ImageView playerImage;
     private final TextView playerTitle, diskPercent, diskAvailable, diskTotal, recordTotal;
     private final CircularProgressIndicator diskProgress;
@@ -56,15 +59,16 @@ public final class RecordPage {
     private final List<Item> all = new ArrayList<>(), shown = new ArrayList<>();
     private final Adapter adapter = new Adapter();
     private Filter filter = Filter.ALL;
+    private ExoPlayer player;
     private final SimpleDateFormat timeFmt = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.US);
 
     public RecordPage(MainActivity a) {
         this.a = a;
-        recycler = a.findViewById(R.id.record_recycler);
+        RecyclerView recycler = a.findViewById(R.id.record_recycler);
         recycler.setLayoutManager(new LinearLayoutManager(a));
         recycler.setAdapter(adapter);
         playerLayout = a.findViewById(R.id.player_layout); emptyText = a.findViewById(R.id.record_empty);
-        playerVideo = a.findViewById(R.id.player_video); playerImage = a.findViewById(R.id.player_image); playerTitle = a.findViewById(R.id.player_title);
+        playerView = a.findViewById(R.id.player_video); playerImage = a.findViewById(R.id.player_image); playerTitle = a.findViewById(R.id.player_title);
         diskPercent = a.findViewById(R.id.disk_percent); diskAvailable = a.findViewById(R.id.disk_available); diskTotal = a.findViewById(R.id.disk_total);
         recordTotal = a.findViewById(R.id.record_total); diskProgress = a.findViewById(R.id.disk_progress);
         search = a.findViewById(R.id.record_search);
@@ -78,11 +82,8 @@ public final class RecordPage {
         });
         a.findViewById(R.id.record_refresh).setOnClickListener(v -> refresh());
         a.findViewById(R.id.player_close).setOnClickListener(v -> stopPreview());
-        playerVideo.setOnCompletionListener(mp -> playerVideo.seekTo(0));
-        playerVideo.setOnErrorListener((mp, w, e) -> { a.showMessage("Video oynatılamadı"); stopPreview(); return true; });
     }
 
-    /** Sayfa acilinca ve yenilemede: liste + disk bilgisi. */
     public void refresh() {
         all.clear();
         query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "Movies/K9/", true);
@@ -124,26 +125,41 @@ public final class RecordPage {
             if (c == null) return;
             while (c.moveToNext())
                 all.add(new Item(ContentUris.withAppendedId(base, c.getLong(0)), c.getString(1), c.getLong(2), c.getLong(3), video));
-        } catch (SecurityException e) { a.showMessage("Kayıt listesi okunamadı: " + e.getMessage()); }
+        } catch (SecurityException e) { a.showMessage("Kayıt listesi okunamadı"); }
     }
 
+    /** Eski buildExoPlayer: her acilista yeni player, kapatinca release. */
     private void play(Item it) {
         stopPreview();
         playerTitle.setText(it.name);
         playerLayout.setVisibility(View.VISIBLE);
-        if (it.video) { playerVideo.setVisibility(View.VISIBLE); playerVideo.setVideoURI(it.uri); playerVideo.start(); }
-        else { playerImage.setVisibility(View.VISIBLE); playerImage.setImageURI(it.uri); }
+        if (!it.video) { playerImage.setVisibility(View.VISIBLE); playerImage.setImageURI(it.uri); return; }
+        player = new ExoPlayer.Builder(a).build();
+        playerView.setPlayer(player);
+        playerView.setVisibility(View.VISIBLE);
+        player.setMediaItem(MediaItem.fromUri(it.uri));
+        player.setRepeatMode(Player.REPEAT_MODE_ONE);
+        player.addListener(new Player.Listener() {
+            @Override public void onPlayerError(@NonNull PlaybackException error) { a.showMessage("Video oynatılamadı"); stopPreview(); }
+        });
+        player.prepare();
+        player.play();
     }
 
     private void confirmDelete(Item it) {
-        new AlertDialog.Builder(a).setTitle("Kaydı sil").setMessage(it.name + " kalıcı olarak silinsin mi?")
-                .setPositiveButton("Sil", (d, w) -> { a.getContentResolver().delete(it.uri, null, null); refresh(); })
-                .setNegativeButton("Geri", null).show();
+        new FullScreenSweetAlertDialog(a, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Kaydı sil")
+                .setContentText(it.name + " kalıcı olarak silinecek. Emin misiniz?")
+                .setConfirmText("Sil")
+                .setConfirmClickListener(d -> { d.dismissWithAnimation(); a.getContentResolver().delete(it.uri, null, null); refresh(); })
+                .setCancelButton("Vazgeç", SweetAlertDialog::dismissWithAnimation)
+                .show();
     }
 
     public void stopPreview() {
-        if (playerVideo.isPlaying()) playerVideo.stopPlayback();
-        playerVideo.setVisibility(View.GONE); playerImage.setVisibility(View.GONE); playerImage.setImageDrawable(null);
+        if (player != null) { playerView.setPlayer(null); player.release(); player = null; }
+        playerView.setVisibility(View.GONE);
+        playerImage.setVisibility(View.GONE); playerImage.setImageDrawable(null);
         playerLayout.setVisibility(View.GONE);
     }
 

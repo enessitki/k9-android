@@ -5,6 +5,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import com.esetron.k9.MainActivity;
 import com.esetron.k9.R;
 import com.esetron.k9.Settings;
@@ -54,16 +55,33 @@ public final class SettingsPage {
         a.findViewById(R.id.set_save).setOnClickListener(v -> save());
         a.findViewById(R.id.k9_read).setOnClickListener(v -> read());
         a.findViewById(R.id.k9_apply).setOnClickListener(v -> apply());
-        a.findViewById(R.id.k9_reset).setOnClickListener(v -> a.config.reset(new ConfigClient.Callback() {
-            @Override public void onReply(JSONObject r) { fill(r.optJSONObject("applied")); k9Status.setText("Fabrika değerlerine dönüldü"); }
-            @Override public void onFailure(String why) { k9Status.setText("Hata: " + why); }
-        }));
+        a.findViewById(R.id.k9_reset).setOnClickListener(v -> new FullScreenSweetAlertDialog(a, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Fabrika ayarları")
+                .setContentText("K9 üzerindeki özel ayarlar silinecek ve kamera fabrika değerleriyle yeniden kurulacak.")
+                .setConfirmText("Sıfırla").setCancelText("Vazgeç")
+                .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
+                .setConfirmClickListener(d -> {
+                    d.dismissWithAnimation();
+                    k9Status.setText("Sıfırlanıyor…");
+                    a.config.reset(new ConfigClient.Callback() {
+                        @Override public void onReply(JSONObject r) { fill(r.optJSONObject("applied")); k9Status.setText("Fabrika değerlerine dönüldü"); }
+                        @Override public void onFailure(String why) { k9Status.setText("Hata: " + why); alert(SweetAlertDialog.ERROR_TYPE, "K9 yanıt vermedi", why); }
+                    });
+                }).show());
         a.findViewById(R.id.kiosk_exit).setOnClickListener(v -> {
-            if (kioskPin.getText().toString().equals(s.kioskPin())) { Kiosk.exit(a); s.setKioskEnabled(false); a.showMessage("Kiosk kapatıldı"); }
-            else a.showMessage("PIN yanlış");
+            if (kioskPin.getText().toString().equals(s.kioskPin())) {
+                Kiosk.exit(a); s.setKioskEnabled(false);
+                alert(SweetAlertDialog.SUCCESS_TYPE, "Kiosk kapatıldı", "Uygulama artık cihaza kilitli değil.");
+            } else alert(SweetAlertDialog.ERROR_TYPE, "PIN yanlış", "Kiosk PIN'i doğru değil.");
             kioskPin.setText(""); loadContent();
         });
-        a.findViewById(R.id.kiosk_enter).setOnClickListener(v -> { s.setKioskEnabled(true); Kiosk.enter(a); loadContent(); });
+        a.findViewById(R.id.kiosk_enter).setOnClickListener(v -> new FullScreenSweetAlertDialog(a, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("Kiosk modu")
+                .setContentText("Uygulama cihaza kilitlenecek. Çıkış için kiosk PIN'i gerekir.")
+                .setConfirmText("Başlat").setCancelText("Vazgeç")
+                .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
+                .setConfirmClickListener(d -> { d.dismissWithAnimation(); s.setKioskEnabled(true); Kiosk.enter(a); loadContent(); })
+                .show());
     }
 
     /** Sayfa acilinca: once sifre kapisi. Dogru sifreyle icerik yuklenir. */
@@ -135,6 +153,10 @@ public final class SettingsPage {
             String k = it.next(); EditText e = k9Fields.get(k);
             if (e != null) e.setText(String.valueOf(values.opt(k)));
         }
+    }
+
+    private void alert(int type, String title, String text) {
+        new FullScreenSweetAlertDialog(a, type).setTitleText(title).setContentText(text).setConfirmText("Tamam").show();
     }
 
     private static int num(EditText e, int def) { try { return Integer.parseInt(e.getText().toString().trim()); } catch (NumberFormatException ex) { return def; } }

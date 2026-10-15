@@ -106,6 +106,71 @@
         <item name="android:textSize">11sp</item>
         <item name="android:fontFamily">monospace</item>
     </style>
+    <!-- Durum ekrani kartlari (sirket standardi: ust ortada yuvarlak ikon, hap satirlar) -->
+    <style name="StatCard">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginTop">22dp</item>
+        <item name="android:background">@drawable/bg_stat_card</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingTop">26dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:paddingHorizontal">10dp</item>
+    </style>
+    <style name="StatBadge">
+        <item name="android:layout_width">44dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:layout_gravity">top|center_horizontal</item>
+        <item name="android:background">@drawable/bg_stat_badge</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:translationZ">2dp</item>
+    </style>
+    <style name="StatRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:background">@drawable/bg_stat_row</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingHorizontal">10dp</item>
+    </style>
+    <style name="StatLabel">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">#D6D6D6</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+    <style name="StatValue">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/nav_label_idle</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:singleLine">true</item>
+    </style>
+    <style name="StatDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginVertical">8dp</item>
+        <item name="android:background">#2A2A2A</item>
+    </style>
+    <style name="StatBtn">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">26dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:paddingHorizontal">12dp</item>
+        <item name="android:background">@drawable/bg_stat_btn</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
     <!-- Kart baslik satiri -->
     <style name="CardHeader">
         <item name="android:layout_width">match_parent</item>
