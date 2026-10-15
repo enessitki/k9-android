@@ -11,4 +11,17 @@
     <string name="device_admin_desc">K9 kiosk modu için cihaz yöneticisi</string>
     <string name="exit_confirm">Uygulamadan çıkmak istediğinize emin misiniz?</string>
     <string name="pin_hint">Çıkış PIN</string>
+    <string name="settings_locked">Ayarlar için yönetici şifresi gerekli</string>
+    <string name="password">Şifre</string>
+    <string name="login">GİRİŞ</string>
+    <string name="records">KAYITLAR</string>
+    <string name="disk_usage">Disk Kullanımı</string>
+    <string name="available">Kullanılabilir</string>
+    <string name="total">Toplam</string>
+    <string name="record_count">Kayıt</string>
+    <string name="filter_all">TÜMÜ</string>
+    <string name="filter_video">VİDEO</string>
+    <string name="filter_photo">FOTOĞRAF</string>
+    <string name="search_hint">Ad veya tarih ile ara</string>
+    <string name="no_records">Kayıt yok</string>
 </resources>

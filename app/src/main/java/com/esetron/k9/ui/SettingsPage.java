@@ -1,5 +1,7 @@
 package com.esetron.k9.ui;
 
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -21,7 +23,9 @@ public final class SettingsPage {
 
     private final MainActivity a; private final Settings s;
     private final EditText ip, controlPort, configPort, videoPort, audioRxPort, audioTxPort, jitter, kioskPin;
-    private final TextView kioskState, k9Status;
+    private final TextView kioskState, k9Status, loginWarning;
+    private final View lock, content;
+    private final EditText password, newPassword, newPassword2;
     private final Map<String, EditText> k9Fields = new HashMap<>();
 
     public SettingsPage(MainActivity a) {
@@ -31,6 +35,21 @@ public final class SettingsPage {
         jitter = a.findViewById(R.id.set_jitter); kioskPin = a.findViewById(R.id.kiosk_pin); kioskState = a.findViewById(R.id.kiosk_state); k9Status = a.findViewById(R.id.k9_status);
         int[] ids = {R.id.k9_cameraWidth, R.id.k9_cameraHeight, R.id.k9_cameraFps, R.id.k9_outputWidth, R.id.k9_outputHeight, R.id.k9_outputFps, R.id.k9_linkTimeoutSec};
         for (int i = 0; i < K9_KEYS.length; i++) k9Fields.put(K9_KEYS[i], a.findViewById(ids[i]));
+
+        // --- sifre kapisi ---
+        lock = a.findViewById(R.id.settings_lock); content = a.findViewById(R.id.settings_content);
+        password = a.findViewById(R.id.settings_password); loginWarning = a.findViewById(R.id.settings_login_warning);
+        newPassword = a.findViewById(R.id.new_password); newPassword2 = a.findViewById(R.id.new_password2);
+        a.findViewById(R.id.settings_login).setOnClickListener(v -> tryLogin());
+        password.setOnEditorActionListener((tv, id, ev) -> { if (id == EditorInfo.IME_ACTION_DONE) { tryLogin(); return true; } return false; });
+        a.findViewById(R.id.settings_logout).setOnClickListener(v -> lockPage());
+        a.findViewById(R.id.password_save).setOnClickListener(v -> {
+            String p1 = newPassword.getText().toString(), p2 = newPassword2.getText().toString();
+            if (p1.length() < 4) { a.showMessage("Şifre en az 4 karakter olmalı"); return; }
+            if (!p1.equals(p2)) { a.showMessage("Şifreler aynı değil"); return; }
+            s.setAdminPassword(p1); newPassword.setText(""); newPassword2.setText("");
+            a.showMessage("Yönetici şifresi değiştirildi");
+        });
 
         a.findViewById(R.id.set_save).setOnClickListener(v -> save());
         a.findViewById(R.id.k9_read).setOnClickListener(v -> read());
@@ -42,13 +61,28 @@ public final class SettingsPage {
         a.findViewById(R.id.kiosk_exit).setOnClickListener(v -> {
             if (kioskPin.getText().toString().equals(s.kioskPin())) { Kiosk.exit(a); s.setKioskEnabled(false); a.showMessage("Kiosk kapatıldı"); }
             else a.showMessage("PIN yanlış");
-            kioskPin.setText(""); load();
+            kioskPin.setText(""); loadContent();
         });
-        a.findViewById(R.id.kiosk_enter).setOnClickListener(v -> { s.setKioskEnabled(true); Kiosk.enter(a); load(); });
+        a.findViewById(R.id.kiosk_enter).setOnClickListener(v -> { s.setKioskEnabled(true); Kiosk.enter(a); loadContent(); });
     }
 
-    /** Sayfa acilinca: alanlari doldur, K9'u oku. */
+    /** Sayfa acilinca: once sifre kapisi. Dogru sifreyle icerik yuklenir. */
     public void load() {
+        lockPage();
+    }
+
+    private void lockPage() {
+        password.setText(""); loginWarning.setText("");
+        lock.setVisibility(View.VISIBLE); content.setVisibility(View.GONE);
+    }
+
+    private void tryLogin() {
+        if (!password.getText().toString().equals(s.adminPassword())) { loginWarning.setText("Hatalı şifre"); password.setText(""); return; }
+        lock.setVisibility(View.GONE); content.setVisibility(View.VISIBLE);
+        loadContent();
+    }
+
+    private void loadContent() {
         ip.setText(s.k9Ip()); controlPort.setText(String.valueOf(s.controlPort())); configPort.setText(String.valueOf(s.configPort()));
         videoPort.setText(String.valueOf(s.videoPort())); audioRxPort.setText(String.valueOf(s.audioRxPort()));
         audioTxPort.setText(String.valueOf(s.audioTxPort())); jitter.setText(String.valueOf(s.jitterMs()));

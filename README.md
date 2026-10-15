@@ -24,9 +24,9 @@ res/layout/
   left_bar.xml        VİDEO / KAYIT / DURUM / AYARLAR nav hücreleri, çıkış
   right_bar.xml       bitrate, LED, blind, harita, kayıt, hoparlör, bas-konuş
   dialog_bitrate.xml  dialog_led_blind.xml  dialog_speaker.xml  dialog_record.xml  dialog_map.xml
-  page_record.xml     kayıt listesi + önizleme/silme
+  page_record.xml     disk kartı + tür filtresi/arama + kart listesi + oynatıcı (eski dialog_video_file_layout_view)
   page_status.xml     link, video, K9 ayarları, telefon pil/GPS/kiosk
-  page_settings.xml   bağlantı ayarları, K9 uzak ayarları, kiosk
+  page_settings.xml   yönetici şifresi kapısı; bağlantı ayarları, K9 uzak ayarları, şifre değiştirme, kiosk
 app/src/main/jni/video-native.c      GStreamer: video + ses rx + PTT tx, tek context thread, hata -> backoff ile yeniden kurma
 app/src/main/java/com/esetron/k9/
   MainActivity.java                  orkestrasyon: native, ağ, yaşam döngüsü
@@ -68,6 +68,9 @@ Tam kiosk için telefon fabrika ayarlarında, hesap eklenmeden:
 adb install -r app-debug.apk
 adb shell dpm set-device-owner com.esetron.k9/.kiosk.KioskAdminReceiver
 ```
+
+Ayarlar sayfası yönetici şifresi ister (varsayılan `palem`, sayfa içinden
+değiştirilir; `Settings.java`). Kiosk çıkış PIN'i ayrı (varsayılan `1453`).
 
 Sonrasında uygulama HOME olur, LockTask'ta kilitlenir (Geri/Son uygulamalar
 kapalı), açılışta kendisi başlar. Cihaz sahibi değilse ekran sabitleme

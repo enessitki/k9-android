@@ -19,6 +19,8 @@ public final class Settings {
     public int jitterMs()       { return sp.getInt("jitterMs", 80); }
     public String kioskPin()    { return sp.getString("kioskPin", "1453"); }
     public boolean kioskEnabled() { return sp.getBoolean("kiosk", true); }
+    /** Ayarlar sayfasi girisi (eski uygulamadaki yonetici sifresinin karsiligi). */
+    public String adminPassword() { return sp.getString("adminPassword", "palem"); }
 
     public void setK9Ip(String v)        { sp.edit().putString("k9Ip", v).apply(); }
     public void setControlPort(int v)    { sp.edit().putInt("controlPort", v).apply(); }
@@ -29,4 +31,5 @@ public final class Settings {
     public void setJitterMs(int v)       { sp.edit().putInt("jitterMs", v).apply(); }
     public void setKioskPin(String v)    { sp.edit().putString("kioskPin", v).apply(); }
     public void setKioskEnabled(boolean v) { sp.edit().putBoolean("kiosk", v).apply(); }
+    public void setAdminPassword(String v) { sp.edit().putString("adminPassword", v).apply(); }
 }

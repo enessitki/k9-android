@@ -1,40 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Kayit sayfasi: solda liste, sagda onizleme/oynatma -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Kayit sayfasi (eski dialog_video_file_layout_view karsiligi):
+     ust baslik karti (disk kullanimi | filtre | arama), altinda kart listesi,
+     oynatici tam sayfa katmani. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:padding="8dp">
+    android:background="@color/black">
+
     <LinearLayout
-        android:layout_width="0dp"
+        android:id="@+id/record_list_layout"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="2"
-        android:background="@drawable/card_background_dark"
         android:orientation="vertical">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
-            <TextView style="@style/SectionTitle" android:layout_width="0dp" android:layout_weight="1" android:text="KAYITLAR (Movies/K9, Pictures/K9)" />
-            <TextView android:id="@+id/disk_info" style="@style/RowValue" android:paddingEnd="10dp" android:text="" android:textColor="@color/text_dim" android:textSize="11sp" />
-        </LinearLayout>
-        <ListView
-            android:id="@+id/record_list"
+
+        <!-- Ust baslik karti -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardBackgroundColor="#1A1A1A"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <!-- Sol: disk kullanimi -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.2"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
+                        <com.google.android.material.progressindicator.CircularProgressIndicator
+                            android:id="@+id/disk_progress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:progress="0"
+                            app:indicatorColor="#4CAF50"
+                            app:indicatorSize="56dp"
+                            app:trackColor="#2D2D44"
+                            app:trackCornerRadius="8dp"
+                            app:trackThickness="8dp" />
+                        <TextView android:id="@+id/disk_percent" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="--%" android:textColor="@color/white" android:textSize="13sp" android:textStyle="bold" />
+                    </FrameLayout>
+                    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:letterSpacing="0.05" android:text="@string/disk_usage" android:textColor="@color/white" android:textSize="13sp" android:textStyle="bold" />
+                        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:orientation="horizontal">
+                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="14dp" android:orientation="vertical">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/available" android:textColor="#AAAAAA" android:textSize="10sp" />
+                                <TextView android:id="@+id/disk_available" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-- GB" android:textColor="@color/white" android:textSize="14sp" android:textStyle="bold" />
+                            </LinearLayout>
+                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="14dp" android:orientation="vertical">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/total" android:textColor="#AAAAAA" android:textSize="10sp" />
+                                <TextView android:id="@+id/disk_total" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="-- GB" android:textColor="@color/white" android:textSize="14sp" android:textStyle="bold" />
+                            </LinearLayout>
+                            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/record_count" android:textColor="#AAAAAA" android:textSize="10sp" />
+                                <TextView android:id="@+id/record_total" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textColor="@color/accent_cyan" android:textSize="14sp" android:textStyle="bold" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View android:layout_width="2dp" android:layout_height="64dp" android:layout_marginHorizontal="10dp" android:background="#3A3A3A" />
+
+                <!-- Orta: tur filtresi -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="6dp" android:gravity="center_vertical" android:orientation="horizontal">
+                        <View android:layout_width="3dp" android:layout_height="14dp" android:layout_marginEnd="8dp" android:background="@color/accent_cyan" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Filtreleme" android:textColor="@color/white" android:textSize="14sp" android:textStyle="bold" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="36dp" android:orientation="horizontal">
+                        <Button android:id="@+id/filter_all" style="@style/BtnToggle" android:text="@string/filter_all" android:textSize="11sp" />
+                        <Button android:id="@+id/filter_video" style="@style/BtnToggle" android:text="@string/filter_video" android:textSize="11sp" />
+                        <Button android:id="@+id/filter_photo" style="@style/BtnToggle" android:layout_marginEnd="0dp" android:text="@string/filter_photo" android:textSize="11sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View android:layout_width="2dp" android:layout_height="64dp" android:layout_marginHorizontal="10dp" android:background="#3A3A3A" />
+
+                <!-- Sag: arama + yenile -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <EditText
+                        android:id="@+id/record_search"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:backgroundTint="@color/accent_cyan"
+                        android:hint="@string/search_hint"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:paddingHorizontal="12dp"
+                        android:textAlignment="center"
+                        android:textColor="@color/white"
+                        android:textColorHint="#AAAAAA"
+                        android:textSize="13sp" />
+                    <Button android:id="@+id/record_refresh" style="@style/BtnGhost" android:layout_marginTop="6dp" android:layout_marginEnd="0dp" android:text="YENİLE" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Kart listesi -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/record_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="@color/divider"
-            android:dividerHeight="1dp" />
+            android:clipToPadding="false"
+            android:paddingHorizontal="8dp"
+            android:paddingBottom="8dp" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/record_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="monospace"
+        android:text="@string/no_records"
+        android:textColor="@color/text_dim"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <!-- Oynatici / goruntuleyici katmani (eski dialog_gallery player_view) -->
     <FrameLayout
-        android:id="@+id/preview_frame"
-        android:layout_width="0dp"
+        android:id="@+id/player_layout"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="8dp"
-        android:layout_weight="3"
-        android:background="@drawable/card_background_dark">
-        <VideoView android:id="@+id/preview_video" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_gravity="center" android:visibility="gone" />
-        <ImageView android:id="@+id/preview_image" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" android:visibility="gone" android:importantForAccessibility="no" />
-        <TextView android:id="@+id/preview_hint" style="@style/RowValue" android:layout_gravity="center" android:text="Listeden bir kayıt seçin" android:textColor="@color/text_dim" />
-        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="bottom|end" android:layout_margin="8dp" android:orientation="horizontal">
-            <Button android:id="@+id/preview_delete" style="@style/BtnGhost" android:text="SİL" android:visibility="gone" />
-            <Button android:id="@+id/preview_close" style="@style/BtnGhost" android:layout_marginEnd="0dp" android:text="KAPAT" android:visibility="gone" />
-        </LinearLayout>
+        android:background="@color/black"
+        android:translationZ="10dp"
+        android:visibility="gone">
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="8dp"
+            app:cardBackgroundColor="#000000"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
+            <VideoView android:id="@+id/player_video" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_gravity="center" android:visibility="gone" />
+            <ImageView android:id="@+id/player_image" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" android:visibility="gone" android:importantForAccessibility="no" />
+        </androidx.cardview.widget.CardView>
+        <TextView android:id="@+id/player_title" style="@style/ChipText" android:layout_gravity="top|start" android:layout_margin="16dp" android:background="@drawable/card_background_dark" android:padding="6dp" android:text="" />
+        <ImageButton
+            android:id="@+id/player_close"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="12dp"
+            android:background="@drawable/toastmiddle"
+            android:foreground="@drawable/ic_close_24"
+            android:translationZ="10dp" />
     </FrameLayout>
-</LinearLayout>
+</FrameLayout>

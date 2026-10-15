@@ -22,11 +22,8 @@
         <ImageButton android:id="@+id/btn_blind" style="@style/FnIcon" android:background="@drawable/ic_blind_foreground" />
         <ImageButton android:id="@+id/btn_map" style="@style/FnIcon" android:background="@drawable/ic_map_24" />
         <ImageButton android:id="@+id/btn_record" style="@style/FnIcon" android:background="@drawable/ic_baseline_photo_camera_24" />
-
-        <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
-
         <ImageButton android:id="@+id/btn_speaker" style="@style/FnIcon" android:background="@drawable/baseline_volume_up_24" />
         <!-- Bas-konus: basili tutuldugu surece mikrofon K9'a gider -->
-        <ImageButton android:id="@+id/btn_mic" style="@style/FnIcon" android:layout_width="60dp" android:layout_height="60dp" android:layout_marginBottom="16dp" android:background="@drawable/ic_baseline_mic_24" />
+        <ImageButton android:id="@+id/btn_mic" style="@style/FnIcon" android:background="@drawable/ic_baseline_mic_24" />
     </LinearLayout>
 </FrameLayout>
