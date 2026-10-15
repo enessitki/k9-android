@@ -21,8 +21,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="64dp"
-        android:layout_marginTop="44dp"
-        android:layout_marginEnd="80dp"
         android:background="@color/page_bg"
         android:visibility="gone">
         <include android:id="@+id/page_record" layout="@layout/page_record" android:layout_width="match_parent" android:layout_height="match_parent" android:visibility="gone" />

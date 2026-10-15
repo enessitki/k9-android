@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.text.InputType;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -16,7 +17,7 @@ public final class LeftBar {
     public static final int PAGE_VIDEO = 0, PAGE_RECORD = 1, PAGE_STATUS = 2, PAGE_SETTINGS = 3;
 
     private final MainActivity a;
-    private final View pageContainer, pageRecord, pageStatus, pageSettings;
+    private final View pageContainer, pageRecord, pageStatus, pageSettings, topLayout, rightLayout;
     private final View[] cells = new View[4], indicators = new View[4];
     private final TextView[] labels = new TextView[4];
     private final ImageButton[] icons = new ImageButton[4];
@@ -30,6 +31,8 @@ public final class LeftBar {
         pageStatus = a.findViewById(R.id.page_status);
         pageSettings = a.findViewById(R.id.page_settings);
         recordCount = a.findViewById(R.id.record_count);
+        topLayout = a.findViewById(R.id.top_layout);
+        rightLayout = a.findViewById(R.id.right_layout);
 
         int[] cellIds = {R.id.nav_cell_video, R.id.nav_cell_record, R.id.nav_cell_status, R.id.nav_cell_settings};
         int[] indIds = {R.id.nav_indicator_video, R.id.nav_indicator_record, R.id.nav_indicator_status, R.id.nav_indicator_settings};
@@ -53,7 +56,16 @@ public final class LeftBar {
     public void select(int p) {
         page = p;
         a.rightBar.closePanels();
-        pageContainer.setVisibility(p == PAGE_VIDEO ? View.GONE : View.VISIBLE);
+        // Ust serit ve sag fonksiyon cubugu yalniz VIDEO sayfasinda (eski uygulamadaki gibi);
+        // diger sayfalar sol cubuk disinda tum ekrani kullanir.
+        boolean videoPage = p == PAGE_VIDEO;
+        topLayout.setVisibility(videoPage ? View.VISIBLE : View.GONE);
+        rightLayout.setVisibility(videoPage ? View.VISIBLE : View.GONE);
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) pageContainer.getLayoutParams();
+        float d = a.getResources().getDisplayMetrics().density;
+        lp.setMargins((int) (64 * d), 0, 0, 0);
+        pageContainer.setLayoutParams(lp);
+        pageContainer.setVisibility(videoPage ? View.GONE : View.VISIBLE);
         pageRecord.setVisibility(p == PAGE_RECORD ? View.VISIBLE : View.GONE);
         pageStatus.setVisibility(p == PAGE_STATUS ? View.VISIBLE : View.GONE);
         pageSettings.setVisibility(p == PAGE_SETTINGS ? View.VISIBLE : View.GONE);
