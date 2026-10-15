@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sag fonksiyon cubugu: ikon dugmeler. Panel acan dugmeler cyan'a doner. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="80dp"
+    android:layout_height="match_parent">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/left_bar_try"
+        android:rotation="180" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingTop="48dp">
+
+        <ImageButton android:id="@+id/btn_bitrate" style="@style/FnIcon" android:background="@drawable/speedometer" />
+        <ImageButton android:id="@+id/btn_led" style="@style/FnIcon" android:background="@drawable/ic_headlights" android:rotation="-90" />
+        <ImageButton android:id="@+id/btn_blind" style="@style/FnIcon" android:background="@drawable/ic_blind_foreground" />
+        <ImageButton android:id="@+id/btn_map" style="@style/FnIcon" android:background="@drawable/ic_map_24" />
+        <ImageButton android:id="@+id/btn_record" style="@style/FnIcon" android:background="@drawable/ic_baseline_photo_camera_24" />
+
+        <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+        <ImageButton android:id="@+id/btn_speaker" style="@style/FnIcon" android:background="@drawable/baseline_volume_up_24" />
+        <!-- Bas-konus: basili tutuldugu surece mikrofon K9'a gider -->
+        <ImageButton android:id="@+id/btn_mic" style="@style/FnIcon" android:layout_width="60dp" android:layout_height="60dp" android:layout_marginBottom="16dp" android:background="@drawable/ic_baseline_mic_24" />
+    </LinearLayout>
+</FrameLayout>

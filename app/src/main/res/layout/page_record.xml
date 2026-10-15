@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Kayit sayfasi: solda liste, sagda onizleme/oynatma -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:padding="8dp">
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:background="@drawable/card_background_dark"
+        android:orientation="vertical">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+            <TextView style="@style/SectionTitle" android:layout_width="0dp" android:layout_weight="1" android:text="KAYITLAR (Movies/K9, Pictures/K9)" />
+            <TextView android:id="@+id/disk_info" style="@style/RowValue" android:paddingEnd="10dp" android:text="" android:textColor="@color/text_dim" android:textSize="11sp" />
+        </LinearLayout>
+        <ListView
+            android:id="@+id/record_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@color/divider"
+            android:dividerHeight="1dp" />
+    </LinearLayout>
+    <FrameLayout
+        android:id="@+id/preview_frame"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_weight="3"
+        android:background="@drawable/card_background_dark">
+        <VideoView android:id="@+id/preview_video" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_gravity="center" android:visibility="gone" />
+        <ImageView android:id="@+id/preview_image" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" android:visibility="gone" android:importantForAccessibility="no" />
+        <TextView android:id="@+id/preview_hint" style="@style/RowValue" android:layout_gravity="center" android:text="Listeden bir kayıt seçin" android:textColor="@color/text_dim" />
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="bottom|end" android:layout_margin="8dp" android:orientation="horizontal">
+            <Button android:id="@+id/preview_delete" style="@style/BtnGhost" android:text="SİL" android:visibility="gone" />
+            <Button android:id="@+id/preview_close" style="@style/BtnGhost" android:layout_marginEnd="0dp" android:text="KAPAT" android:visibility="gone" />
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

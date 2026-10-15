@@ -1,46 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.K9" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:windowBackground">@color/black</item>
         <item name="android:windowFullscreen">true</item>
-        <item name="colorPrimary">@color/accent</item>
-        <item name="colorSecondary">@color/accent</item>
+        <item name="colorPrimary">@color/accent_cyan</item>
+        <item name="colorSecondary">@color/accent_cyan</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="Hud" parent="Widget.AppCompat.TextView">
+    <!-- Sol nav ikonu -->
+    <style name="NavIcon">
+        <item name="android:layout_width">44dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:backgroundTint">@color/white</item>
+    </style>
+    <style name="NavLabel">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/hud</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:textColor">@color/nav_label_idle</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+    <!-- Sag fonksiyon ikonu -->
+    <style name="FnIcon">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:backgroundTint">@color/white</item>
+        <item name="android:translationZ">1dp</item>
+    </style>
+    <!-- Yan panel kart satirlari -->
+    <style name="Row">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingHorizontal">10dp</item>
+    </style>
+    <style name="RowAlt" parent="Row">
+        <item name="android:background">@drawable/row_background_alt</item>
+    </style>
+    <style name="RowLabel">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="RowValue">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/white</item>
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">monospace</item>
     </style>
-
-    <style name="Label" parent="Hud">
-        <item name="android:textSize">12sp</item>
-        <item name="android:layout_marginTop">6dp</item>
-    </style>
-
-    <style name="Sq" parent="Widget.AppCompat.Button">
-        <item name="android:layout_width">40dp</item>
-        <item name="android:layout_height">40dp</item>
-        <item name="android:minWidth">0dp</item>
-        <item name="android:minHeight">0dp</item>
-        <item name="android:padding">0dp</item>
+    <style name="RowEdit">
+        <item name="android:layout_width">120dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/white</item>
         <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">end</item>
+        <item name="android:backgroundTint">@color/accent_cyan</item>
     </style>
-
-    <style name="Tog" parent="Widget.AppCompat.Button">
-        <item name="android:layout_width">160dp</item>
-        <item name="android:layout_height">44dp</item>
-        <item name="android:layout_marginTop">4dp</item>
-        <item name="android:textSize">12sp</item>
+    <style name="SwitchK9">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:switchMinWidth">60dp</item>
+        <item name="android:thumb">@drawable/custom_switch_thump</item>
+        <item name="android:track">@drawable/custom_switch_track</item>
+        <item name="android:background">@drawable/switch_ripple</item>
     </style>
-
-    <style name="Big" parent="Widget.AppCompat.Button">
-        <item name="android:layout_width">84dp</item>
-        <item name="android:layout_height">64dp</item>
-        <item name="android:layout_marginTop">6dp</item>
+    <style name="SectionTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/ok</item>
         <item name="android:textSize">11sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.12</item>
+        <item name="android:paddingHorizontal">10dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">6dp</item>
+    </style>
+    <style name="BtnPrimary">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:background">@drawable/bg_btn_primary</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+    </style>
+    <style name="BtnGhost" parent="BtnPrimary">
+        <item name="android:background">@drawable/bg_btn_ghost</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+    <style name="BtnToggle" parent="BtnGhost">
+        <item name="android:background">@drawable/bg_btn_toggle</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginEnd">6dp</item>
+    </style>
+    <style name="Chip">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:clipToOutline">true</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:background">@drawable/bg_comm_chip</item>
+        <item name="android:layout_marginEnd">8dp</item>
+    </style>
+    <style name="ChipCap">
+        <item name="android:layout_width">34dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/bg_chip_cap</item>
+    </style>
+    <style name="ChipText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:includeFontPadding">false</item>
     </style>
 </resources>

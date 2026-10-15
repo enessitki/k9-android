@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="280dp"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_background_no_stroke"
+        android:orientation="vertical"
+        android:padding="12dp">
+        <TextView style="@style/SectionTitle" android:text="SES" />
+        <LinearLayout style="@style/RowAlt">
+            <TextView style="@style/RowLabel" android:text="K9 hoparlör" />
+            <Switch android:id="@+id/speaker_switch" style="@style/SwitchK9" />
+        </LinearLayout>
+        <LinearLayout style="@style/Row">
+            <TextView style="@style/RowLabel" android:text="Gürültü azaltma (RNNoise)" />
+            <Switch android:id="@+id/noise_switch" style="@style/SwitchK9" />
+        </LinearLayout>
+        <LinearLayout style="@style/RowAlt">
+            <TextView style="@style/RowLabel" android:text="K9 sesini dinle" />
+            <Switch android:id="@+id/listen_switch" style="@style/SwitchK9" android:checked="true" />
+        </LinearLayout>
+        <TextView style="@style/RowValue" android:layout_marginTop="8dp" android:paddingHorizontal="10dp" android:text="Konuşmak için sağdaki mikrofon düğmesini basılı tutun" android:textColor="@color/text_dim" android:textSize="12sp" />
+    </LinearLayout>
+</FrameLayout>

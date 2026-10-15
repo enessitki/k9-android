@@ -37,6 +37,7 @@ public final class NativeBridge {
     private native void nativeSurfaceRelease();
     private native void nativePtt(boolean on);
     private native void nativeAudioRestart();
+    private native void nativeListen(boolean on);
 
     static {
         System.loadLibrary("gstreamer_android");
@@ -76,6 +77,8 @@ public final class NativeBridge {
     public void ptt(boolean on) { if (initialized) nativePtt(on); }
     /** RECORD_AUDIO izni sonradan verilince ses pipeline'larini yeniden kurar. */
     public void audioRestart() { if (initialized) nativeAudioRestart(); }
+    /** K9 sesini dinleme ac/kapa. */
+    public void listen(boolean on) { if (initialized) nativeListen(on); }
 
     // ---- native -> Java (native thread) ----
     @SuppressWarnings("unused")

@@ -55,6 +55,7 @@ typedef struct {
     gchar        *host;                /* K9 IP */
     gint          video_port, audio_rx_port, audio_tx_port, latency_ms;
     gboolean      running;             /* kullanici "baslat" dedi mi */
+    gboolean      listen;              /* K9 sesi dinleniyor mu */
 } NativeData;
 
 static JavaVM   *java_vm;
@@ -254,7 +255,7 @@ static gboolean build_audio (NativeData *d) {
 }
 
 static void set_audio_state (NativeData *d, GstState st) {
-    if (d->audio_rx) gst_element_set_state (d->audio_rx, st);
+    if (d->audio_rx) gst_element_set_state (d->audio_rx, (st == GST_STATE_PLAYING && !d->listen) ? GST_STATE_READY : st);
     if (d->audio_tx) gst_element_set_state (d->audio_tx, st);
 }
 
@@ -357,11 +358,19 @@ static gboolean ptt_cb (gpointer p) {
     if (r->d->tx_valve) g_object_set (r->d->tx_valve, "drop", !r->on, NULL);
     return G_SOURCE_REMOVE;
 }
+/* K9 sesini dinleme ac/kapa (rx pipeline PLAYING/READY) */
+static gboolean listen_cb (gpointer p) {
+    PttReq *r = p; NativeData *d = r->d;
+    d->listen = r->on;
+    if (d->audio_rx && d->running) gst_element_set_state (d->audio_rx, r->on ? GST_STATE_PLAYING : GST_STATE_READY);
+    return G_SOURCE_REMOVE;
+}
 
 /* ------------------------------------------------------- JNI girisleri */
 static void n_init (JNIEnv *env, jobject thiz) {
     NativeData *d = g_new0 (NativeData, 1);
     d->app = (*env)->NewGlobalRef (env, thiz);
+    d->listen = TRUE;
     d->host = g_strdup ("192.168.2.10"); d->video_port = 5001; d->audio_rx_port = 14551; d->audio_tx_port = 14552; d->latency_ms = 80;
     d->context = g_main_context_new ();
     d->main_loop = g_main_loop_new (d->context, FALSE);
@@ -402,6 +411,11 @@ static void n_surface_release (JNIEnv *env, jobject thiz) {
     NativeData *d = GET_DATA (env, thiz); if (!d || !d->context) return;
     run_on_context_sync (d, surface_release_cb, d);   /* Android: dondukten sonra surface kullanilmaz */
 }
+static void n_listen (JNIEnv *env, jobject thiz, jboolean on) {
+    NativeData *d = GET_DATA (env, thiz); if (!d || !d->context) return;
+    PttReq *r = g_new0 (PttReq, 1); r->d = d; r->on = on;
+    queue_on_context (d, listen_cb, r, g_free);
+}
 static void n_audio_restart (JNIEnv *env, jobject thiz) { NativeData *d = GET_DATA (env, thiz); if (d && d->context) queue_on_context (d, audio_restart_cb, d, NULL); }
 static void n_ptt (JNIEnv *env, jobject thiz, jboolean on) {
     NativeData *d = GET_DATA (env, thiz); if (!d || !d->context) return;
@@ -428,6 +442,7 @@ static JNINativeMethod methods[] = {
     { "nativeSurfaceRelease", "()V", (void *) n_surface_release },
     { "nativePtt", "(Z)V", (void *) n_ptt },
     { "nativeAudioRestart", "()V", (void *) n_audio_restart },
+    { "nativeListen", "(Z)V", (void *) n_listen },
 };
 
 jint JNI_OnLoad (JavaVM *vm, void *reserved) {

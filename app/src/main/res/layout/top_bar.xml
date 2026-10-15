@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ust serit: link chip, tarih/saat chip (acilir GPS paneli), pil chip -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:translationZ="12dp">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@color/bar_surface" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp">
+
+        <LinearLayout android:id="@+id/link_chip" style="@style/Chip">
+            <FrameLayout style="@style/ChipCap">
+                <ImageView android:id="@+id/link_icon" android:layout_width="18dp" android:layout_height="18dp" android:layout_gravity="center" android:src="@drawable/wifi_strength_off_outline" android:importantForAccessibility="no" />
+            </FrameLayout>
+            <TextView android:id="@+id/link_text" style="@style/ChipText" android:text="@string/link_down" android:textColor="@color/bad" />
+            <TextView android:id="@+id/video_text" style="@style/ChipText" android:text="-" android:textColor="@color/text_dim" android:textSize="11sp" />
+        </LinearLayout>
+
+        <Space android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+        <LinearLayout android:id="@+id/datetime_chip" style="@style/Chip" android:clickable="true" android:focusable="true">
+            <LinearLayout style="@style/ChipCap" android:orientation="vertical">
+                <ImageView android:layout_width="14dp" android:layout_height="14dp" android:layout_marginTop="3dp" android:src="@drawable/baseline_satellite_alt_24" android:importantForAccessibility="no" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:text="▾" android:textColor="@color/white" android:textSize="11sp" />
+            </LinearLayout>
+            <TextView android:id="@+id/datetime" style="@style/ChipText" android:text="--/--/---- --:--:--" />
+        </LinearLayout>
+
+        <Space android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+        <LinearLayout android:id="@+id/battery_chip" style="@style/Chip" android:layout_marginEnd="0dp">
+            <FrameLayout style="@style/ChipCap" android:layout_width="40dp">
+                <ImageView android:layout_width="18dp" android:layout_height="18dp" android:layout_gravity="center" android:src="@drawable/ic_battery" android:importantForAccessibility="no" />
+            </FrameLayout>
+            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp" android:gravity="center_horizontal" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:letterSpacing="0.15" android:text="UKB" android:textColor="@color/text_dim" android:textSize="8sp" android:textStyle="bold" />
+                <TextView android:id="@+id/ukb_battery" style="@style/ChipText" android:layout_marginStart="0dp" android:text="%--" />
+            </LinearLayout>
+            <View android:layout_width="1dp" android:layout_height="22dp" android:layout_marginHorizontal="10dp" android:background="#26FFFFFF" />
+            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_horizontal" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:letterSpacing="0.15" android:text="K9" android:textColor="@color/text_dim" android:textSize="8sp" android:textStyle="bold" />
+                <TextView android:id="@+id/k9_battery" style="@style/ChipText" android:layout_marginStart="0dp" android:text="%--" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Acilir GPS paneli (tarih/saat chip'ine dokununca) -->
+    <LinearLayout
+        android:id="@+id/gps_panel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/card_background_dark"
+        android:minWidth="320dp"
+        android:orientation="vertical"
+        android:padding="6dp"
+        android:visibility="gone">
+        <TextView style="@style/SectionTitle" android:text="KONUM BİLGİSİ" />
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginHorizontal="4dp" android:background="#4035E0C4" />
+        <TextView android:id="@+id/gps_self" style="@style/RowValue" android:layout_width="match_parent" android:background="@drawable/row_background_alt" android:padding="8dp" android:text="UKB: GPS konumu alınıyor…" android:textSize="13sp" />
+        <TextView android:id="@+id/gps_mgrs" style="@style/RowValue" android:layout_width="match_parent" android:padding="8dp" android:text="MGRS: -" android:textSize="13sp" />
+        <TextView android:id="@+id/gps_k9" style="@style/RowValue" android:layout_width="match_parent" android:background="@drawable/row_background_alt" android:padding="8dp" android:text="K9: -" android:textSize="13sp" />
+    </LinearLayout>
+</FrameLayout>

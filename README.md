@@ -13,10 +13,25 @@ gerekmez. `k9-project` deposundaki `claude/no-stab` dalının karşılığıdır
 
 ## Yapı
 
+Eski uygulamayla aynı tasarım dili: 64dp sol nav sütunu (sayfa seçimi),
+80dp sağ fonksiyon çubuğu (yanında açılır paneller), üst şerit (chip'ler),
+her sayfa ve panel ayrı layout dosyası.
+
 ```
+res/layout/
+  main.xml            video + top_bar + left_bar + right_bar + page_* + dialog_* (include)
+  top_bar.xml         link chip (durum, fps), tarih/saat chip (açılır GPS paneli), pil chip (UKB, K9)
+  left_bar.xml        VİDEO / KAYIT / DURUM / AYARLAR nav hücreleri, çıkış
+  right_bar.xml       bitrate, LED, blind, harita, kayıt, hoparlör, bas-konuş
+  dialog_bitrate.xml  dialog_led_blind.xml  dialog_speaker.xml  dialog_record.xml  dialog_map.xml
+  page_record.xml     kayıt listesi + önizleme/silme
+  page_status.xml     link, video, K9 ayarları, telefon pil/GPS/kiosk
+  page_settings.xml   bağlantı ayarları, K9 uzak ayarları, kiosk
 app/src/main/jni/video-native.c      GStreamer: video + ses rx + PTT tx, tek context thread, hata -> backoff ile yeniden kurma
 app/src/main/java/com/esetron/k9/
-  MainActivity.java                  tek ekran: video, üst bilgi, sol kontrol, sağ işlem
+  MainActivity.java                  orkestrasyon: native, ağ, yaşam döngüsü
+  ui/LeftBar.java  ui/RightBar.java  ui/TopBar.java      çubuklar
+  ui/RecordPage.java  ui/StatusPage.java  ui/SettingsPage.java   sayfalar
   Settings.java                      SharedPreferences (IP, portlar, jitter, kiosk PIN)
   video/NativeBridge.java            JNI
   net/ControlSender.java             8 bayt kontrol paketi, sabit 4 Hz
@@ -25,7 +40,6 @@ app/src/main/java/com/esetron/k9/
   capture/CaptureService.java        ekran kaydı (MediaProjection, ön plan servisi) -> Movies/K9
   capture/Screenshot.java            PixelCopy(video) + UI -> Pictures/K9
   map/MapController.java             osmdroid çevrimdışı harita, telefon GPS'i, MGRS
-  ui/SettingsDialog.java             ayarlar
 ```
 
 ## Derleme

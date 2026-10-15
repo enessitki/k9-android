@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">K9 Control</string>
-    <string name="link_down">LINK YOK</string>
+    <string name="nav_video">VİDEO</string>
+    <string name="nav_record">KAYIT</string>
+    <string name="nav_status">DURUM</string>
+    <string name="nav_settings">AYARLAR</string>
     <string name="link_up">LINK</string>
-    <string name="gps_none">GPS yok</string>
-    <string name="bitrate">Bitrate</string>
-    <string name="led">LED</string>
-    <string name="blind">Blind</string>
-    <string name="blind_on">Blind AÇIK</string>
-    <string name="speaker">Hoparlör</string>
-    <string name="speaker_on">Hoparlör AÇIK</string>
-    <string name="noise">Gürültü az.</string>
-    <string name="noise_on">Gürültü az. AÇIK</string>
-    <string name="ptt">BAS\nKONUŞ</string>
-    <string name="rec">KAYIT</string>
-    <string name="rec_stop">DURDUR</string>
-    <string name="snap">EKRAN\nGÖRÜNTÜSÜ</string>
-    <string name="map">HARİTA</string>
-    <string name="settings">AYARLAR</string>
+    <string name="link_down">LINK YOK</string>
+    <string name="gps_wait">GPS konumu alınıyor…</string>
     <string name="device_admin_desc">K9 kiosk modu için cihaz yöneticisi</string>
+    <string name="exit_confirm">Uygulamadan çıkmak istediğinize emin misiniz?</string>
+    <string name="pin_hint">Çıkış PIN</string>
 </resources>

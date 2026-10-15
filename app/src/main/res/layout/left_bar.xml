@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sol nav sutunu: sayfa secimi. Aktif hucre: tonlu zemin + cyan gosterge + cyan etiket -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="64dp"
+    android:layout_height="match_parent"
+    android:background="@color/bar_surface">
+
+    <View
+        android:layout_width="0.5dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:background="@color/bar_hairline" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dp">
+            <ImageButton
+                android:id="@+id/close"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_gravity="center"
+                android:background="@drawable/ic_close_24"
+                android:scaleType="centerInside" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginHorizontal="14dp"
+            android:background="@color/bar_hairline" />
+
+        <!-- Hucreler dikeyde esit dagilir -->
+        <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+        <FrameLayout android:id="@+id/nav_cell_video" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="6dp" android:background="@color/nav_cell_active_tint">
+            <View android:id="@+id/nav_indicator_video" android:layout_width="3dp" android:layout_height="46dp" android:layout_gravity="start|center_vertical" android:background="@color/accent_cyan" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:orientation="vertical">
+                <ImageButton android:id="@+id/page_video" style="@style/NavIcon" android:background="@drawable/baseline_home_24" />
+                <TextView android:id="@+id/nav_label_video" style="@style/NavLabel" android:text="@string/nav_video" android:textColor="@color/accent_cyan" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+        <FrameLayout android:id="@+id/nav_cell_record" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="6dp">
+            <View android:id="@+id/nav_indicator_record" android:layout_width="3dp" android:layout_height="46dp" android:layout_gravity="start|center_vertical" android:background="@color/accent_cyan" android:visibility="invisible" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:orientation="vertical">
+                <FrameLayout android:layout_width="44dp" android:layout_height="44dp">
+                    <ImageButton android:id="@+id/page_record" style="@style/NavIcon" android:background="@drawable/baseline_videocam_24" />
+                    <TextView android:id="@+id/record_count" android:layout_width="18dp" android:layout_height="18dp" android:layout_gravity="top|end" android:background="@drawable/badge_red_pill" android:gravity="center" android:text="0" android:textColor="@color/white" android:textSize="11sp" android:textStyle="bold" android:translationZ="2dp" android:visibility="gone" />
+                </FrameLayout>
+                <TextView android:id="@+id/nav_label_record" style="@style/NavLabel" android:text="@string/nav_record" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+        <FrameLayout android:id="@+id/nav_cell_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="6dp">
+            <View android:id="@+id/nav_indicator_status" android:layout_width="3dp" android:layout_height="46dp" android:layout_gravity="start|center_vertical" android:background="@color/accent_cyan" android:visibility="invisible" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:orientation="vertical">
+                <ImageButton android:id="@+id/page_status" style="@style/NavIcon" android:background="@drawable/monitor_heart_24px" />
+                <TextView android:id="@+id/nav_label_status" style="@style/NavLabel" android:text="@string/nav_status" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+        <FrameLayout android:id="@+id/nav_cell_settings" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="6dp">
+            <View android:id="@+id/nav_indicator_settings" android:layout_width="3dp" android:layout_height="46dp" android:layout_gravity="start|center_vertical" android:background="@color/accent_cyan" android:visibility="invisible" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:orientation="vertical">
+                <ImageButton android:id="@+id/page_settings" style="@style/NavIcon" android:background="@drawable/baseline_settings_24" />
+                <TextView android:id="@+id/nav_label_settings" style="@style/NavLabel" android:text="@string/nav_settings" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+    </LinearLayout>
+</FrameLayout>

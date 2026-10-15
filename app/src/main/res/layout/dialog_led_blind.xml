@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_background_no_stroke"
+        android:orientation="vertical"
+        android:padding="12dp">
+        <TextView style="@style/SectionTitle" android:text="LED" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="10dp">
+            <TextView android:id="@+id/led_value" style="@style/RowValue" android:text="LED seviyesi: %0" android:textColor="@color/nav_label_idle" android:textSize="13sp" />
+            <SeekBar android:id="@+id/led_bar" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:max="100" android:progressDrawable="@drawable/seekbar_style_new" android:splitTrack="false" android:thumb="@drawable/custom_thumb_new" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="6dp" android:orientation="horizontal">
+                <Button android:id="@+id/led_off" style="@style/BtnToggle" android:text="KAPALI" />
+                <Button android:id="@+id/led_50" style="@style/BtnToggle" android:text="%50" />
+                <Button android:id="@+id/led_100" style="@style/BtnToggle" android:layout_marginEnd="0dp" android:text="%100" />
+            </LinearLayout>
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="8dp" android:background="@color/divider" />
+        <LinearLayout style="@style/RowAlt">
+            <TextView style="@style/RowLabel" android:text="Blind mod" />
+            <Switch android:id="@+id/blind_switch" style="@style/SwitchK9" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg">#000000</color>
-    <color name="bar">#99101418</color>
-    <color name="hud">#E6FFFFFF</color>
-    <color name="ok">#4CAF50</color>
-    <color name="bad">#E53935</color>
-    <color name="ptt">#1E88E5</color>
-    <color name="rec">#E53935</color>
-    <color name="accent">#FFB300</color>
+    <!-- Eski projeyle ayni tasarim dili -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="Red">#FF0000</color>
+    <color name="Gray">#808080</color>
+    <color name="Green">#008000</color>
+    <color name="BLACK_A080">#cc000000</color>
+    <color name="GRAY_050_A030">#4cfafafa</color>
+    <color name="bar_surface">#0A0A0A</color>
+    <color name="bar_hairline">#1F1F1F</color>
+    <color name="accent_cyan">#00BCD4</color>
+    <color name="nav_cell_active_tint">#1400BCD4</color>
+    <color name="nav_label_idle">#B0B0B0</color>
+    <color name="ok">#35E0C4</color>
+    <color name="bad">#F44336</color>
+    <color name="warn">#FFB300</color>
+    <color name="text_dim">#99FFFFFF</color>
+    <color name="divider">#2A2A2A</color>
+    <color name="page_bg">#F2050505</color>
 </resources>

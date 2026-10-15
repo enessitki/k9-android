@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="8dp">
+            <TextView style="@style/SectionTitle" android:text="BAĞLANTI" />
+            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Link" /><TextView android:id="@+id/st_link" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Video" /><TextView android:id="@+id/st_video" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="K9 adresi" /><TextView android:id="@+id/st_k9" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Bitrate kademesi" /><TextView android:id="@+id/st_bitrate" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Ayar kanalı" /><TextView android:id="@+id/st_config" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <TextView style="@style/SectionTitle" android:text="K9 AYARLARI (CİHAZDAN OKUNAN)" />
+            <TextView android:id="@+id/st_k9_values" style="@style/RowValue" android:layout_width="match_parent" android:paddingHorizontal="10dp" android:text="-" android:textSize="12sp" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:background="@drawable/card_background_dark" android:orientation="vertical" android:paddingBottom="8dp">
+            <TextView style="@style/SectionTitle" android:text="KONTROL BİRİMİ (UKB)" />
+            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Pil" /><TextView android:id="@+id/st_battery" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="GPS" /><TextView android:id="@+id/st_gps" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="MGRS" /><TextView android:id="@+id/st_mgrs" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Kiosk" /><TextView android:id="@+id/st_kiosk" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <LinearLayout style="@style/RowAlt"><TextView style="@style/RowLabel" android:text="Depolama" /><TextView android:id="@+id/st_disk" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <LinearLayout style="@style/Row"><TextView style="@style/RowLabel" android:text="Uygulama" /><TextView android:id="@+id/st_version" style="@style/RowValue" android:text="-" /></LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp">
+                <Button android:id="@+id/st_refresh" style="@style/BtnGhost" android:text="YENİLE" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

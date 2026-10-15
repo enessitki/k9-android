@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/map_frame"
+    android:layout_width="360dp"
+    android:layout_height="240dp"
+    android:background="@drawable/card_background_dark"
+    android:padding="2dp">
+    <org.osmdroid.views.MapView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <ImageButton
+        android:id="@+id/fullscreen_map"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="start|top"
+        android:layout_margin="4dp"
+        android:alpha="0.7"
+        android:background="@drawable/toastmiddle"
+        android:foreground="@drawable/baseline_fullscreen_24"
+        android:translationZ="10dp" />
+    <ImageButton
+        android:id="@+id/center_self"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="end|top"
+        android:layout_margin="4dp"
+        android:alpha="0.7"
+        android:background="@drawable/toastmiddle"
+        android:foreground="@drawable/baseline_satellite_alt_24"
+        android:translationZ="10dp" />
+</FrameLayout>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="280dp"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_background_no_stroke"
+        android:orientation="vertical"
+        android:padding="12dp">
+        <TextView style="@style/SectionTitle" android:text="VİDEO BİTRATE" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal">
+            <Button android:id="@+id/br1" style="@style/BtnToggle" android:text="0.5M" />
+            <Button android:id="@+id/br2" style="@style/BtnToggle" android:text="1M" />
+            <Button android:id="@+id/br3" style="@style/BtnToggle" android:text="1.5M" />
+            <Button android:id="@+id/br4" style="@style/BtnToggle" android:layout_marginEnd="0dp" android:text="4M" />
+        </LinearLayout>
+        <TextView android:id="@+id/bitrate_hint" style="@style/RowValue" android:layout_marginTop="8dp" android:paddingHorizontal="10dp" android:text="Düşük sinyalde 0.5M / 1M" android:textColor="@color/text_dim" android:textSize="12sp" />
+    </LinearLayout>
+</FrameLayout>
