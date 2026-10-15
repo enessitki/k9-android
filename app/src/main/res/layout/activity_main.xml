@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:keepScreenOn="true">
+
+    <!-- Video: tam ekran. SurfaceView; glimagesink buraya cizer -->
+    <SurfaceView
+        android:id="@+id/video"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Ust bar: link, fps, cozunurluk, GPS/MGRS, saat -->
+    <LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:background="@color/bar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="2dp">
+        <View android:id="@+id/link_dot" android:layout_width="12dp" android:layout_height="12dp" android:background="@drawable/dot_red" />
+        <TextView android:id="@+id/txt_link" style="@style/Hud" android:layout_marginStart="6dp" android:text="@string/link_down" />
+        <TextView android:id="@+id/txt_video" style="@style/Hud" android:layout_marginStart="16dp" android:text="-" />
+        <TextView android:id="@+id/txt_gps" style="@style/Hud" android:layout_width="0dp" android:layout_weight="1" android:gravity="center" android:text="@string/gps_none" />
+        <TextView android:id="@+id/txt_clock" style="@style/Hud" android:text="--:--:--" />
+    </LinearLayout>
+
+    <!-- Sol bar: bitrate, LED, blind, hoparlor, gurultu -->
+    <LinearLayout
+        android:id="@+id/left_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:background="@color/bar"
+        android:orientation="vertical"
+        android:padding="6dp">
+        <TextView style="@style/Label" android:text="@string/bitrate" />
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal">
+            <Button android:id="@+id/br1" style="@style/Sq" android:text="1" />
+            <Button android:id="@+id/br2" style="@style/Sq" android:text="2" />
+            <Button android:id="@+id/br3" style="@style/Sq" android:text="3" />
+            <Button android:id="@+id/br4" style="@style/Sq" android:text="4" />
+        </LinearLayout>
+        <TextView android:id="@+id/txt_led" style="@style/Label" android:text="@string/led" />
+        <SeekBar android:id="@+id/led" android:layout_width="160dp" android:layout_height="wrap_content" android:max="100" />
+        <ToggleButton android:id="@+id/blind" style="@style/Tog" android:textOff="@string/blind" android:textOn="@string/blind_on" />
+        <ToggleButton android:id="@+id/speaker" style="@style/Tog" android:textOff="@string/speaker" android:textOn="@string/speaker_on" />
+        <ToggleButton android:id="@+id/noise" style="@style/Tog" android:textOff="@string/noise" android:textOn="@string/noise_on" />
+    </LinearLayout>
+
+    <!-- Sag bar: bas-konus, kayit, ekran goruntusu, harita, ayarlar -->
+    <LinearLayout
+        android:id="@+id/right_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|center_vertical"
+        android:background="@color/bar"
+        android:orientation="vertical"
+        android:padding="6dp">
+        <Button android:id="@+id/ptt" style="@style/Big" android:backgroundTint="@color/ptt" android:text="@string/ptt" />
+        <Button android:id="@+id/rec" style="@style/Big" android:text="@string/rec" />
+        <Button android:id="@+id/snap" style="@style/Big" android:text="@string/snap" />
+        <Button android:id="@+id/map_toggle" style="@style/Big" android:text="@string/map" />
+        <Button android:id="@+id/settings" style="@style/Big" android:text="@string/settings" />
+    </LinearLayout>
+
+    <!-- Harita paneli (sag alt), varsayilan gizli; dokununca tam ekran -->
+    <FrameLayout
+        android:id="@+id/map_panel"
+        android:layout_width="320dp"
+        android:layout_height="220dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="96dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/bar"
+        android:padding="2dp"
+        android:visibility="gone">
+        <org.osmdroid.views.MapView
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/txt_msg"
+        style="@style/Hud"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:background="@color/bar"
+        android:padding="4dp"
+        android:visibility="gone" />
+</FrameLayout>

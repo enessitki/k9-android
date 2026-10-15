@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#000000</color>
+    <color name="bar">#99101418</color>
+    <color name="hud">#E6FFFFFF</color>
+    <color name="ok">#4CAF50</color>
+    <color name="bad">#E53935</color>
+    <color name="ptt">#1E88E5</color>
+    <color name="rec">#E53935</color>
+    <color name="accent">#FFB300</color>
+</resources>

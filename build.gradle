@@ -1,0 +1,5 @@
+// Kok build: eklenti surumleri. Uygulama bagimliliklari app/build.gradle'da.
+plugins {
+    id 'com.android.application' version '7.4.2' apply false
+}
+task clean(type: Delete) { delete rootProject.buildDir }

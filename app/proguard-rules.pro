@@ -1,0 +1,2 @@
+-keep class org.freedesktop.gstreamer.** { *; }
+-keep class com.esetron.k9.video.NativeBridge { *; }

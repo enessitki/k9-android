@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.K9" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorSecondary">@color/accent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+
+    <style name="Hud" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/hud</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">monospace</item>
+    </style>
+
+    <style name="Label" parent="Hud">
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_marginTop">6dp</item>
+    </style>
+
+    <style name="Sq" parent="Widget.AppCompat.Button">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Tog" parent="Widget.AppCompat.Button">
+        <item name="android:layout_width">160dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="Big" parent="Widget.AppCompat.Button">
+        <item name="android:layout_width">84dp</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+</resources>

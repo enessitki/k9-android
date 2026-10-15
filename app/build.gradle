@@ -1,0 +1,56 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.esetron.k9'
+    compileSdk 34
+    ndkVersion '25.0.8775105'
+
+    defaultConfig {
+        applicationId "com.esetron.k9"
+        minSdk 29
+        targetSdk 34
+        versionCode 1
+        versionName "0.1"
+
+        externalNativeBuild {
+            ndkBuild {
+                def gstRoot = project.hasProperty('gstAndroidRoot') ? project.gstAndroidRoot : System.env.GSTREAMER_ROOT_ANDROID
+                if (gstRoot == null)
+                    throw new GradleException('GSTREAMER_ROOT_ANDROID ortam degiskeni ya da gradle.properties icinde gstAndroidRoot tanimli olmali (GStreamer Android universal dizini)')
+                arguments "NDK_APPLICATION_MK=src/main/jni/Application.mk",
+                          "GSTREAMER_JAVA_SRC_DIR=src/main/java",
+                          "GSTREAMER_ROOT_ANDROID=$gstRoot",
+                          "GSTREAMER_ASSETS_DIR=src/main/assets",
+                          "-j" + Runtime.runtime.availableProcessors()
+                targets "k9native"
+                abiFilters 'arm64-v8a'
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug      // saha testi; dagitimda kendi anahtariniz
+        }
+    }
+
+    externalNativeBuild { ndkBuild { path 'src/main/jni/Android.mk' } }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_11; targetCompatibility JavaVersion.VERSION_11 }
+    packagingOptions { jniLibs { useLegacyPackaging = false } }
+}
+
+// GStreamer.java ndk-build tarafindan uretilir; Java derlemesi ondan sonra kossun
+afterEvaluate {
+    if (project.hasProperty('compileDebugJavaWithJavac')) project.compileDebugJavaWithJavac.dependsOn 'externalNativeBuildDebug'
+    if (project.hasProperty('compileReleaseJavaWithJavac')) project.compileReleaseJavaWithJavac.dependsOn 'externalNativeBuildRelease'
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'org.osmdroid:osmdroid-android:6.1.20'
+    implementation 'mil.nga.mgrs:mgrs-android:2.2.2'
+}
