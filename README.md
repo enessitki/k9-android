@@ -7,7 +7,7 @@ gerekmez. `k9-project` deposundaki `claude/no-stab` dalının karşılığıdır
 |---|---|---|---|
 | K9 → app | Video H.265 RTP | 5001 | `udpsrc ! rtpjitterbuffer ! rtph265depay ! h265parse ! decodebin3 ! glimagesink` (donanım decoder) |
 | K9 → app | Ses Opus RTP | 14551 | `udpsrc ! rtpjitterbuffer ! opusdec ! openslessink` |
-| app → K9 | Ses Opus RTP (bas-konuş) | 14552 | `openslessrc ! opusenc ! rtpopuspay ! valve ! udpsink` |
+| app → K9 | Ses Opus RTP (bas-konuş) | 14552 | `openslessrc ! opusenc ! rtpopuspay ! NULL/PLAYING ! udpsink` |
 | app → K9 | Kontrol, 8 bayt, 4 Hz | 5005 | `net/ControlSender` (heartbeat; K9 4 s paket almazsa video keser) |
 | app → K9 | Ayar JSON, seq+ACK | 5006 | `net/ConfigClient` (Ayarlar → K9 ayarları) |
 

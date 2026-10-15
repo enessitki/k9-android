@@ -3,7 +3,7 @@
  *  video : udpsrc(H.265 RTP) -> rtpjitterbuffer -> rtph265depay -> h265parse
  *          -> Android MediaCodec (amcviddec-*, yoksa avdec_h265) -> glimagesink (Surface)
  *  ses rx: udpsrc(Opus RTP) -> rtpjitterbuffer -> opusdec -> openslessink
- *  ses tx: openslessrc -> opusenc -> rtpopuspay -> valve -> udpsink   (bas-konus: valve)
+ *  ses tx: openslessrc -> opusenc -> rtpopuspay -> udpsink   (bas-konus: NULL<->PLAYING)
  *
  * Tum pipeline islemleri TEK context thread'inde (app_function) yapilir; JNI
  * giris noktalari isi queue_on_context ile kuyruklar ve hemen doner. Java
@@ -50,7 +50,6 @@ typedef struct {
     VideoSlot     video;
     GstElement   *audio_rx;
     GstElement   *audio_tx;
-    GstElement   *tx_valve;
     GSource      *stats_source;
     /* ayarlar (context thread okur; JNI tarafi kuyruklayarak degistirir) */
     gchar        *host;                /* K9 IP */
@@ -211,7 +210,7 @@ static void schedule_video_rebuild (NativeData *d) {
 static gboolean build_audio (NativeData *d) {
     GError *err = NULL;
     if (d->audio_rx) { gst_element_set_state (d->audio_rx, GST_STATE_NULL); gst_object_unref (d->audio_rx); d->audio_rx = NULL; }
-    if (d->audio_tx) { gst_element_set_state (d->audio_tx, GST_STATE_NULL); gst_object_unref (d->audio_tx); d->audio_tx = NULL; d->tx_valve = NULL; }
+    if (d->audio_tx) { gst_element_set_state (d->audio_tx, GST_STATE_NULL); gst_object_unref (d->audio_tx); d->audio_tx = NULL; }
 
     gchar *rx = g_strdup_printf (
         "udpsrc port=%d caps=\"application/x-rtp,media=audio,clock-rate=48000,encoding-name=OPUS,payload=96\" ! "
@@ -221,22 +220,28 @@ static gboolean build_audio (NativeData *d) {
     d->audio_rx = gst_parse_launch (rx, &err); g_free (rx);
     if (err) { LOGE ("audio_rx kurulamadi: %s", err->message); g_clear_error (&err); if (d->audio_rx) { gst_object_unref (d->audio_rx); d->audio_rx = NULL; } }
 
-    /* Mikrofon surekli acik, udpsink onundeki valve bas-konus: aninda, acilis gecikmesi yok */
+    /* Bas-konus: eski uygulamadaki gibi pipeline basta NULL, tusa basinca PLAYING,
+     * birakinca NULL. Her basista yeni RTP akisi (yeni SSRC) -> K9 jitterbuffer
+     * icin temiz baslangic; kayip paket firtinasi / gap yok. */
     gchar *tx = g_strdup_printf (
         "openslessrc ! queue max-size-buffers=4 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
         "audioconvert ! audioresample ! audio/x-raw,rate=48000,channels=1,format=S16LE ! "
         "opusenc bitrate=32000 audio-type=2048 frame-size=20 inband-fec=true packet-loss-percentage=10 ! "
-        "rtpopuspay pt=96 ! valve name=ptt drop=true ! udpsink host=%s port=%d sync=false async=false",
+        "rtpopuspay pt=96 ! udpsink host=%s port=%d sync=false async=false",
         d->host, d->audio_tx_port);
     d->audio_tx = gst_parse_launch (tx, &err); g_free (tx);
     if (err) { LOGE ("audio_tx kurulamadi: %s", err->message); g_clear_error (&err); if (d->audio_tx) { gst_object_unref (d->audio_tx); d->audio_tx = NULL; } }
-    else d->tx_valve = gst_bin_get_by_name (GST_BIN (d->audio_tx), "ptt");
     return d->audio_rx != NULL;
 }
 
-static void set_audio_state (NativeData *d, GstState st) {
-    if (d->audio_rx) gst_element_set_state (d->audio_rx, (st == GST_STATE_PLAYING && !d->listen) ? GST_STATE_READY : st);
-    if (d->audio_tx) gst_element_set_state (d->audio_tx, st);
+/* Ses durumu. Kapatmada READY degil NULL: udpsrc soketi READY'de acik kalir,
+ * kimse okumadigi icin cekirdek tamponunda paket birikir ve tekrar PLAYING'de
+ * jitterbuffer o eski paketleri sirayla calar -> saniyelerce gecikme. NULL'da
+ * soket kapanir, acilista taze akis. (Eski uygulama da NULL->PLAYING yapiyordu.)
+ * on=TRUE: dinleme aciksa rx PLAYING. tx yalniz bas-konus ile PLAYING olur. */
+static void set_audio_state (NativeData *d, gboolean on) {
+    if (d->audio_rx) gst_element_set_state (d->audio_rx, (on && d->listen) ? GST_STATE_PLAYING : GST_STATE_NULL);
+    if (d->audio_tx && !on) gst_element_set_state (d->audio_tx, GST_STATE_NULL);
 }
 
 /* ------------------------------------------------------------ stats */
@@ -272,7 +277,6 @@ static void *app_function (void *ud) {
     /* yikim, context hala ayakta */
     if (d->stats_source) { g_source_destroy (d->stats_source); g_source_unref (d->stats_source); d->stats_source = NULL; }
     teardown_video (d);
-    if (d->tx_valve) { gst_object_unref (d->tx_valve); d->tx_valve = NULL; }
     if (d->audio_rx) { gst_element_set_state (d->audio_rx, GST_STATE_NULL); gst_object_unref (d->audio_rx); d->audio_rx = NULL; }
     if (d->audio_tx) { gst_element_set_state (d->audio_tx, GST_STATE_NULL); gst_object_unref (d->audio_tx); d->audio_tx = NULL; }
     g_main_context_pop_thread_default (d->context);
@@ -291,7 +295,7 @@ static gboolean configure_cb (gpointer p) {
     d->video_port = r->vport; d->audio_rx_port = r->arx; d->audio_tx_port = r->atx; d->latency_ms = r->lat;
     if (changed) {
         build_audio (d);
-        if (d->running) { set_audio_state (d, GST_STATE_PLAYING); teardown_video (d); start_video (d); }
+        if (d->running) { set_audio_state (d, TRUE); teardown_video (d); start_video (d); }
     }
     return G_SOURCE_REMOVE;
 }
@@ -300,19 +304,19 @@ static gboolean configure_cb (gpointer p) {
 static gboolean audio_restart_cb (gpointer p) {
     NativeData *d = p;
     build_audio (d);
-    if (d->running) set_audio_state (d, GST_STATE_PLAYING);
+    if (d->running) set_audio_state (d, TRUE);
     return G_SOURCE_REMOVE;
 }
 
 static gboolean start_cb (gpointer p) {
     NativeData *d = p; d->running = TRUE; d->video.retry_count = 0;
-    set_audio_state (d, GST_STATE_PLAYING);
+    set_audio_state (d, TRUE);
     if (!start_video (d) && d->window) schedule_video_rebuild (d);
     return G_SOURCE_REMOVE;
 }
 static gboolean stop_cb (gpointer p) {
     NativeData *d = p; d->running = FALSE;
-    teardown_video (d); set_audio_state (d, GST_STATE_READY);
+    teardown_video (d); set_audio_state (d, FALSE);
     return G_SOURCE_REMOVE;
 }
 
@@ -337,16 +341,26 @@ static gboolean surface_release_cb (gpointer p) {
 }
 
 typedef struct { NativeData *d; gboolean on; } PttReq;
+/* Bas-konus: basinca NULL->PLAYING (taze akis), birakinca NULL. Eski uygulamadaki
+ * gst_native_send_audio_start/stop ile ayni. Video sayfasi disinda (running=FALSE) gonderilmez. */
 static gboolean ptt_cb (gpointer p) {
-    PttReq *r = p;
-    if (r->d->tx_valve) g_object_set (r->d->tx_valve, "drop", !r->on, NULL);
+    PttReq *r = p; NativeData *d = r->d;
+    if (!d->audio_tx) return G_SOURCE_REMOVE;
+    gst_element_set_state (d->audio_tx, GST_STATE_NULL);
+    if (r->on && d->running) {
+        if (gst_element_set_state (d->audio_tx, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE) {
+            LOGE ("audio_tx PLAYING olamadi (mikrofon izni?)");
+            gst_element_set_state (d->audio_tx, GST_STATE_NULL);
+            ui_message (d, "Mikrofon açılamadı");
+        }
+    }
     return G_SOURCE_REMOVE;
 }
-/* K9 sesini dinleme ac/kapa (rx pipeline PLAYING/READY) */
+/* K9 sesini dinleme ac/kapa (rx pipeline PLAYING/NULL) */
 static gboolean listen_cb (gpointer p) {
     PttReq *r = p; NativeData *d = r->d;
     d->listen = r->on;
-    if (d->audio_rx && d->running) gst_element_set_state (d->audio_rx, r->on ? GST_STATE_PLAYING : GST_STATE_READY);
+    if (d->audio_rx) gst_element_set_state (d->audio_rx, (r->on && d->running) ? GST_STATE_PLAYING : GST_STATE_NULL);
     return G_SOURCE_REMOVE;
 }
 
