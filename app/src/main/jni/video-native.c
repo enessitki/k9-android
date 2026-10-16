@@ -214,8 +214,14 @@ static gboolean build_audio (NativeData *d) {
 
     gchar *rx = g_strdup_printf (
         "udpsrc port=%d caps=\"application/x-rtp,media=audio,clock-rate=48000,encoding-name=OPUS,payload=96\" ! "
-        "rtpjitterbuffer latency=60 do-lost=true ! rtpopusdepay ! opusdec plc=true use-inband-fec=true ! "
-        "audioconvert ! audioresample ! openslessink sync=false buffer-time=100000",
+        "rtpjitterbuffer latency=40 do-lost=true ! rtpopusdepay ! opusdec plc=true use-inband-fec=true ! "
+        "audioconvert ! audioresample ! "
+        /* Sizdiran kucuk kuyruk: K9 saat hizi telefonun DAC saatinden bir tik hizliysa
+         * sync=false sink'in halkasi dolar, yukari dogru paket birikir ve gecikme
+         * dakikalar icinde buyur. Halka doluyken kuyruk EN ESKI kareyi atar (10 ms,
+         * duyulmaz) -> gecikme ust siniri sabit: ~40 jb + 20 kuyruk + 60 halka ms. */
+        "queue max-size-buffers=2 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
+        "openslessink sync=false buffer-time=60000 latency-time=20000",
         d->audio_rx_port);
     d->audio_rx = gst_parse_launch (rx, &err); g_free (rx);
     if (err) { LOGE ("audio_rx kurulamadi: %s", err->message); g_clear_error (&err); if (d->audio_rx) { gst_object_unref (d->audio_rx); d->audio_rx = NULL; } }
