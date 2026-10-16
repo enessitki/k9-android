@@ -65,27 +65,27 @@ public final class StatusPage {
         set(updated, fmt.format(new Date()), GREY);
 
         // --- Baglanti karti ---
-        if (!querying && k9Conn.getText().toString().equals("-")) set(k9Conn, "sorgulanıyor", GREY);
-        set(videoState, a.videoPaused ? "duraklatıldı (bu sayfa)" : (a.linkUp() ? "akıyor" : "görüntü yok"),
+        if (!querying && k9Conn.getText().toString().equals("-")) set(k9Conn, "Sorgulanıyor", GREY);
+        set(videoState, a.videoPaused ? "Duraklatıldı (bu sayfa)" : (a.linkUp() ? "Akıyor" : "Görüntü yok"),
                 a.videoPaused ? ORANGE : (a.linkUp() ? GREEN : RED));
         set(video, a.lastW > 0 ? a.lastW + "x" + a.lastH : "-", CYAN);
         set(fps, a.lastFps > 0 ? a.lastFps + " fps" : "-", CYAN);
         set(bitrate, a.control.bitrate() + " / 4", CYAN);
-        set(led, a.control.led() > 0 ? "%" + a.control.led() : "kapalı", a.control.led() > 0 ? ORANGE : GREY);
-        set(blind, a.control.blind() ? "AÇIK" : "kapalı", a.control.blind() ? ORANGE : GREY);
-        set(speaker, a.control.speaker() ? "AÇIK" : "kapalı", a.control.speaker() ? GREEN : GREY);
-        set(noise, a.control.noiseReduction() ? "AÇIK" : "kapalı", a.control.noiseReduction() ? GREEN : GREY);
+        set(led, a.control.led() > 0 ? "%" + a.control.led() : "Kapalı", a.control.led() > 0 ? ORANGE : GREY);
+        set(blind, a.control.blind() ? "Açık" : "Kapalı", a.control.blind() ? ORANGE : GREY);
+        set(speaker, a.control.speaker() ? "Açık" : "Kapalı", a.control.speaker() ? GREEN : GREY);
+        set(noise, a.control.noiseReduction() ? "Açık" : "Kapalı", a.control.noiseReduction() ? GREEN : GREY);
 
         // --- Kontrol birimi karti ---
         int pct = a.topBar.batteryPct;
         set(battery, pct >= 0 ? "%" + pct : "-", pct < 0 ? GREY : pct <= 15 ? RED : pct <= 30 ? ORANGE : GREEN);
-        set(charging, pct < 0 ? "-" : (a.topBar.charging ? "şarj oluyor" : "pilde"), a.topBar.charging ? GREEN : GREY);
-        set(gps, a.hasFix ? "fix var" : "fix yok", a.hasFix ? GREEN : ORANGE);
+        set(charging, pct < 0 ? "-" : (a.topBar.charging ? "Şarj oluyor" : "Pilde"), a.topBar.charging ? GREEN : GREY);
+        set(gps, a.hasFix ? "Fix var" : "Fix yok", a.hasFix ? GREEN : ORANGE);
         set(gpsFull, a.hasFix ? String.format(Locale.US, "%.5f, %.5f", a.selfLat, a.selfLon) : "-", CYAN);
         set(mgrs, a.hasFix ? a.selfMgrs : "-", CYAN);
-        set(map, a.mapCtl.isOffline() ? "çevrimdışı" : "çevrimdışı dosya yok", a.mapCtl.isOffline() ? GREEN : ORANGE);
+        set(map, a.mapCtl.isOffline() ? "Çevrimdışı" : "Çevrimdışı dosya yok", a.mapCtl.isOffline() ? GREEN : ORANGE);
         boolean owner = Kiosk.isDeviceOwner(a);
-        set(kiosk, owner ? "tam kiosk" : (Kiosk.isLocked(a) ? "ekran sabitleme" : "kapalı"), owner ? GREEN : (Kiosk.isLocked(a) ? ORANGE : GREY));
+        set(kiosk, owner ? "Tam kiosk" : (Kiosk.isLocked(a) ? "Ekran sabitleme" : "Kapalı"), owner ? GREEN : (Kiosk.isLocked(a) ? ORANGE : GREY));
         File dir = a.getExternalFilesDir(null);
         if (dir != null) {
             StatFs st = new StatFs(dir.getAbsolutePath());
@@ -102,14 +102,14 @@ public final class StatusPage {
         a.config.get(new ConfigClient.Callback() {
             @Override public void onReply(JSONObject r) {
                 querying = false;
-                set(k9Conn, "BAĞLI", GREEN);
-                set(config, r.optBoolean("override") ? "özel ayarlar" : "fabrika ayarları", r.optBoolean("override") ? ORANGE : GREEN);
+                set(k9Conn, "Bağlı", GREEN);
+                set(config, r.optBoolean("override") ? "Özel ayarlar" : "Fabrika ayarları", r.optBoolean("override") ? ORANGE : GREEN);
                 fillRows(r.optJSONObject("values"));
             }
             @Override public void onFailure(String why) {
                 querying = false;
-                set(k9Conn, "YOK", RED);
-                set(config, "yanıt yok", RED);
+                set(k9Conn, "Yok", RED);
+                set(config, "Yanıt yok", RED);
                 k9Rows.removeAllViews(); k9Empty.setVisibility(View.VISIBLE); k9Empty.setText("K9'a ulaşılamadı");
             }
         });
@@ -132,7 +132,7 @@ public final class StatusPage {
 
     private void fillRows(JSONObject v) {
         k9Rows.removeAllViews();
-        if (v == null || v.length() == 0) { k9Empty.setVisibility(View.VISIBLE); k9Empty.setText("değer yok"); return; }
+        if (v == null || v.length() == 0) { k9Empty.setVisibility(View.VISIBLE); k9Empty.setText("Değer yok"); return; }
         k9Empty.setVisibility(View.GONE);
         for (Iterator<String> it = v.keys(); it.hasNext(); ) {
             String key = it.next();

@@ -36,7 +36,7 @@
                 <LinearLayout style="@style/StatRow"><TextView style="@style/StatLabel" android:text="Ayar durumu" /><TextView android:id="@+id/st_config" style="@style/StatValue" android:text="-" /></LinearLayout>
                 <View style="@style/StatDivider" />
                 <LinearLayout android:id="@+id/st_k9_rows" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
-                <TextView android:id="@+id/st_k9_empty" style="@style/StatLabel" android:layout_width="match_parent" android:paddingHorizontal="10dp" android:paddingVertical="8dp" android:text="sorgulanıyor…" />
+                <TextView android:id="@+id/st_k9_empty" style="@style/StatLabel" android:layout_width="match_parent" android:paddingHorizontal="10dp" android:paddingVertical="8dp" android:text="Sorgulanıyor…" />
             </LinearLayout>
             <ImageView style="@style/StatBadge" android:src="@drawable/baseline_settings_24" android:importantForAccessibility="no" />
         </FrameLayout>
