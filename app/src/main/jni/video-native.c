@@ -422,12 +422,31 @@ static gboolean build_video (NativeData *d) {
 }
 
 static gboolean start_video (NativeData *d) {
+    VideoSlot *v = &d->video;
     if (!d->running || !d->window) return FALSE;
-    if (!d->video.pipeline && !build_video (d)) return FALSE;
-    if (gst_element_set_state (d->video.pipeline, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE) {
+    if (!v->pipeline && !build_video (d)) return FALSE;
+    /* Duraklatmadan donuste sayaclar simdiden baslasin: watchdog eski "kare yok"
+     * suresini stall sanmasin. */
+    gint64 now = g_get_monotonic_time ();
+    __atomic_store_n (&v->last_fed_us, now, __ATOMIC_RELAXED);
+    __atomic_store_n (&v->last_frame_us, now, __ATOMIC_RELAXED);
+    g_mutex_lock (&v->dec_lock); v->accept_input = TRUE; g_mutex_unlock (&v->dec_lock);
+    if (gst_element_set_state (v->pipeline, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE) {
         ui_message (d, "Video PLAYING olamadi"); return FALSE;
     }
     return TRUE;
+}
+
+/* Sayfa degisimi: referans koddaki gibi pipeline yikilmaz, PAUSED'a alinir; codec
+ * ve yuzey kalir, donuste PLAYING (ilk kare icin yeniden kurulum/IRAP beklemesi yok).
+ * PAUSED'da appsink'e AU gelmez; yine de accept_input kapatilir ki duraklama
+ * aninda yolda olan AU codec'e gitmesin. Soket acik kaldigi icin biriken (en fazla
+ * buffer-size kadar) eski paketler donuste hizla akar, appsink drop=true ile atilir. */
+static void pause_video (NativeData *d) {
+    VideoSlot *v = &d->video;
+    if (!v->pipeline) return;
+    g_mutex_lock (&v->dec_lock); v->accept_input = FALSE; g_mutex_unlock (&v->dec_lock);
+    gst_element_set_state (v->pipeline, GST_STATE_PAUSED);
 }
 
 static gboolean video_retry_cb (gpointer ud) {
@@ -458,7 +477,7 @@ static void schedule_video_rebuild (NativeData *d) {
  * AU gelmiyorsa (K9 video gondermiyor / link yok) dokunulmaz: udpsrc beklemede. */
 static void video_watchdog (NativeData *d, gint64 now) {
     VideoSlot *v = &d->video;
-    if (!v->pipeline || v->retry_source) return;
+    if (!v->pipeline || v->retry_source || !d->running) return;   /* duraklatilmisken bakma */
     gint64 fed_age   = now - __atomic_load_n (&v->last_fed_us,   __ATOMIC_RELAXED);
     gint64 frame_age = now - __atomic_load_n (&v->last_frame_us, __ATOMIC_RELAXED);
     if (frame_age < STALL_TIMEOUT_US || fed_age >= STALL_TIMEOUT_US) return;
@@ -594,7 +613,7 @@ static gboolean start_cb (gpointer p) {
 }
 static gboolean stop_cb (gpointer p) {
     NativeData *d = p; d->running = FALSE;
-    teardown_video (d); set_audio_state (d, FALSE);
+    pause_video (d); set_audio_state (d, FALSE);
     return G_SOURCE_REMOVE;
 }
 

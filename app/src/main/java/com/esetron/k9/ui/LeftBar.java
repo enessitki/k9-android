@@ -57,9 +57,9 @@ public final class LeftBar {
     public void select(int p) {
         page = p;
         a.rightBar.closeAll();
-        // Eski uygulamadaki gibi: video disindaki sayfalarda video/ses pipeline'lari
-        // durur (decoder ve ag yuku yok), VIDEO'ya donunce yeniden kurulur.
-        // Kontrol paketi (heartbeat) gondermeye devam eder.
+        // Eski uygulamadaki gibi: video disindaki sayfalarda video pipeline'i PAUSED
+        // (codec ve yuzey kalir), ses pipeline'lari NULL; VIDEO'ya donunce video PLAYING,
+        // ses yeniden baslar. Kontrol paketi (heartbeat) gondermeye devam eder.
         a.setVideoPaused(p != PAGE_VIDEO);
         // Ust serit ve sag fonksiyon cubugu yalniz VIDEO sayfasinda (eski uygulamadaki gibi);
         // diger sayfalar sol cubuk disinda tum ekrani kullanir.
