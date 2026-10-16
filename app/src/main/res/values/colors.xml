@@ -18,5 +18,5 @@
     <color name="warn">#FFB300</color>
     <color name="text_dim">#99FFFFFF</color>
     <color name="divider">#2A2A2A</color>
-    <color name="page_bg">#F2050505</color>
+    <color name="page_bg">#FF050505</color>
 </resources>
