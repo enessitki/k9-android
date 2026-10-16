@@ -28,7 +28,7 @@ res/layout/
   page_status.xml     üç kart (BAĞLANTI / K9 AYARLARI / KONTROL BİRİMİ): üstte yuvarlak ikon, hap satırlar, renkli değerler
   page_status.xml     link, video, K9 ayarları, telefon pil/GPS/kiosk
   page_settings.xml   yönetici şifresi kapısı; bağlantı ayarları, K9 uzak ayarları, şifre değiştirme, kiosk
-app/src/main/jni/video-native.c      GStreamer: video + ses rx + PTT tx, tek context thread, hata -> backoff ile yeniden kurma
+app/src/main/jni/video-native.c      GStreamer yalnız ağ+depay+parse; video çözme AMediaCodec (NDK) -> SurfaceView (sıfır kopya, GL yok); ses rx + PTT tx; tek context thread, hata -> backoff
 app/src/main/java/com/esetron/k9/
   MainActivity.java                  orkestrasyon: native, ağ, yaşam döngüsü
   ui/LeftBar.java  ui/RightBar.java  ui/TopBar.java      çubuklar
@@ -97,6 +97,20 @@ Arşiv yoksa çevrimiçi OSM kullanılır ve harita açılınca ekranda yol gös
 DURUM sayfası "Harita kaynağı" satırında hangisinin aktif olduğu yazar.
 Operatör konumu telefon GPS'inden; K9 konumu telemetri eklenince
 `MapController.setK9Position`.
+
+## Video mimarisi
+
+```
+udpsrc -> rtpjitterbuffer -> rtph265depay -> h265parse -> appsink ==AU==> AMediaCodec (donanım HEVC)
+                                                                               |
+                                                              ANativeWindow (SurfaceView) <- SurfaceFlinger
+```
+
+GStreamer yalnız ağ + depay + parse yapar. Sıkıştırılmış AU'lar (birkaç KB) codec'in input
+buffer'ına kopyalanır, çözülmüş kare hiç CPU'ya gelmez: codec doğrudan SurfaceView'a basar.
+`glimagesink`/SurfaceTexture/GL yok. Watchdog: AU veriliyor ama 4 s kare yoksa yalnız codec
+yenilenir; 60 s içinde 2 yenileme olursa pipeline yeniden kurulur. Paket kaybında anahtar
+kare beklenmez (kısa artifact, sonraki IRAP'ta toparlar).
 
 ## Kayıtlar
 

@@ -1,7 +1,9 @@
 /* k9native -- K9 kontrol birimi medya katmani (GStreamer Android).
  *
- *  video : udpsrc(H.265 RTP) -> rtpjitterbuffer -> rtph265depay -> h265parse
- *          -> Android MediaCodec (amcviddec-*, yoksa avdec_h265) -> glimagesink (Surface)
+ *  video : udpsrc(H.265 RTP) -> rtpjitterbuffer -> rtph265depay -> h265parse -> appsink
+ *          ==AU==> AMediaCodec (donanim HEVC) -> ANativeWindow (SurfaceView) <- SurfaceFlinger
+ *          GStreamer yalniz ag+depay+parse; cozme/gosterme GStreamer disinda. GL yok,
+ *          SurfaceTexture yok, kare kopyasi yok (Rockchip projesiyle ayni mimari).
  *  ses rx: udpsrc(Opus RTP) -> rtpjitterbuffer -> opusdec -> openslessink
  *  ses tx: openslessrc -> opusenc -> rtpopuspay -> udpsink   (bas-konus: NULL<->PLAYING)
  *
@@ -18,7 +20,10 @@
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <gst/gst.h>
-#include <gst/video/videooverlay.h>
+#include <gst/app/gstappsink.h>
+#include <media/NdkMediaCodec.h>
+#include <media/NdkMediaFormat.h>
+#include <media/NdkMediaError.h>
 
 GST_DEBUG_CATEGORY_STATIC (debug_category);
 #define GST_CAT_DEFAULT debug_category
@@ -29,16 +34,51 @@ GST_DEBUG_CATEGORY_STATIC (debug_category);
 #define GET_DATA(env, thiz) ((NativeData *) (intptr_t) (*env)->GetLongField (env, thiz, native_data_field))
 #define SET_DATA(env, thiz, d) (*env)->SetLongField (env, thiz, native_data_field, (jlong) (intptr_t) (d))
 
+/* Donanim decoder (AMediaCodec -> ANativeWindow, sifir kopya).
+ * feed : appsink streaming thread'i (hwdec_feed)   - input
+ * out  : kendi thread'i (hwdec_output_thread)      - dequeueOutput + render
+ * ctx  : context thread (yarat/yok et/yuzey)       - yasam dongusu (VideoSlot.dec_lock) */
+#define HWDEC_MIME              "video/hevc"
+#define HWDEC_INPUT_TIMEOUT_US  20000     /* bos input beklemesi; asilirsa AU dusur (geri basinc yok) */
+#define HWDEC_OUTPUT_TIMEOUT_US 10000     /* out thread dequeue periyodu */
+#define HWDEC_KEYFRAME_WAIT_US  1500000   /* csd yokken IRAP icin en fazla bu kadar bekle */
+#define STALL_TIMEOUT_US        (4 * G_USEC_PER_SEC)   /* AU veriliyor ama kare yok -> codec yenile */
+#define RECYCLE_LIMIT           2                      /* 60 s icinde bu kadar yenileme -> pipeline rebuild */
+#define RECYCLE_WINDOW_US       (60 * G_USEC_PER_SEC)
+
+typedef struct {
+    AMediaCodec *codec;
+    GThread     *out_thread;
+    gint         running;           /* atomic */
+    gboolean     need_keyframe;     /* yalniz feed thread'i */
+    gint64       kf_wait_since_us;
+    gboolean     kf_warned;
+    gint64      *last_frame_us;     /* slot alani, out thread yazar (atomic) */
+    gint64      *last_fed_us;       /* slot alani, feed yazar (atomic) */
+    gint        *out_w, *out_h;     /* slot alani, out thread yazar (atomic) */
+    gint64       frames_out;        /* atomic */
+    gint64       aus_in, aus_fed, aus_dropped, in_timeout_run;   /* atomic */
+} HwDecoder;
+
 typedef struct {
     GstElement *pipeline;
-    GstElement *sink;          /* glimagesink (GstVideoOverlay) */
+    GstElement *appsink;       /* ref'li */
     GSource    *bus_source;
     GSource    *retry_source;
     guint       retry_count;
     gchar      *desc;
-    gint        frames;        /* sink pad probe sayar (streaming thread, atomik) */
-    gint        frames_last;   /* stats timer'in son okudugu */
-    gboolean    caps_logged;
+
+    GMutex      dec_lock;      /* dec / csd / accept_input / NativeData.window: appsink thread'i ile paylasilir */
+    HwDecoder  *dec;           /* NULL = yok; ilk AU'da pencere varsa acilir */
+    GByteArray *csd;           /* son gorulen VPS/SPS/PPS (Annex-B) */
+    gboolean    accept_input;  /* FALSE: AU dusur, decoder acma */
+    gint64      dec_fail_us;   /* son basarisiz acma; 1 s backoff */
+
+    gint64      last_input_us, last_fed_us, last_frame_us;   /* atomic (watchdog okur) */
+    gint        out_w, out_h;                                 /* atomic */
+    gint64      frames_last;   /* stats: son okunan kare sayisi */
+    gint        recycle_count; gint64 last_recycle_us;
+    gboolean    format_logged;
 } VideoSlot;
 
 typedef struct {
@@ -110,22 +150,224 @@ static void run_on_context_sync (NativeData *d, GSourceFunc fn, gpointer ud) {
 /* -------------------------------------------------------------- video */
 static void schedule_video_rebuild (NativeData *d);
 
-static GstPadProbeReturn count_frames_probe (GstPad *pad, GstPadProbeInfo *info, gpointer ud) {
-    (void) pad; (void) info;
-    g_atomic_int_add (&((VideoSlot *) ud)->frames, 1);
-    return GST_PAD_PROBE_OK;
+/* Annex-B AU icinde IRAP (nal_unit_type 16..23: BLA/IDR/CRA) var mi? */
+static gboolean au_has_irap (const guint8 *d, gsize n) {
+    for (gsize i = 0; i + 3 < n; i++) {
+        if (d[i] == 0 && d[i + 1] == 0 && d[i + 2] == 1) {
+            guint t = (d[i + 3] >> 1) & 0x3f;
+            if (t >= 16 && t <= 23) return TRUE;
+            i += 2;
+        }
+    }
+    return FALSE;
+}
+
+/* AU icindeki VPS(32)/SPS(33)/PPS(34) NAL'larini baslangic koduyla out'a yazar.
+ * TRUE = en az bir parametre seti bulundu (out once temizlenir). */
+static gboolean au_extract_param_sets (const guint8 *d, gsize n, GByteArray *out) {
+    gboolean found = FALSE; gsize i = 0;
+    while (i + 3 < n) {
+        if (!(d[i] == 0 && d[i + 1] == 0 && d[i + 2] == 1)) { i++; continue; }
+        gsize sc = (i > 0 && d[i - 1] == 0) ? i - 1 : i;
+        gsize nal = i + 3; if (nal >= n) break;
+        guint t = (d[nal] >> 1) & 0x3f;
+        gsize j = nal + 1;
+        while (j + 2 < n && !(d[j] == 0 && d[j + 1] == 0 && d[j + 2] == 1)) j++;
+        gsize end = (j + 2 < n) ? ((d[j - 1] == 0) ? j - 1 : j) : n;
+        if (t >= 32 && t <= 34) {
+            if (!found) g_byte_array_set_size (out, 0);
+            g_byte_array_append (out, d + sc, (guint) (end - sc));
+            found = TRUE;
+        }
+        i = end;
+    }
+    return found;
+}
+
+static gpointer hwdec_output_thread (gpointer ud) {
+    HwDecoder *d = ud; AMediaCodecBufferInfo info;
+    while (g_atomic_int_get (&d->running)) {
+        ssize_t idx = AMediaCodec_dequeueOutputBuffer (d->codec, &info, HWDEC_OUTPUT_TIMEOUT_US);
+        if (idx >= 0) {
+            gboolean render = info.size > 0;
+            /* render=TRUE: kare dogrudan SurfaceView'a, bir sonraki vsync'te. Kopya yok. */
+            if (AMediaCodec_releaseOutputBuffer (d->codec, (size_t) idx, render) != AMEDIA_OK)
+                LOGE ("releaseOutputBuffer hatasi");
+            if (render) {
+                __atomic_add_fetch (&d->frames_out, 1, __ATOMIC_RELAXED);
+                __atomic_store_n (d->last_frame_us, g_get_monotonic_time (), __ATOMIC_RELAXED);
+            }
+            if (info.flags & AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM) break;
+        } else if (idx == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED) {
+            AMediaFormat *f = AMediaCodec_getOutputFormat (d->codec);
+            if (f) {
+                int32_t w = 0, h = 0;
+                /* crop varsa gercek goruntu boyutu odur (stride/slice yuvarlamasi degil) */
+                int32_t l = 0, t = 0, r = 0, b = 0;
+                if (AMediaFormat_getInt32 (f, "crop-left", &l) && AMediaFormat_getInt32 (f, "crop-right", &r) &&
+                    AMediaFormat_getInt32 (f, "crop-top", &t) && AMediaFormat_getInt32 (f, "crop-bottom", &b)) {
+                    w = r - l + 1; h = b - t + 1;
+                } else {
+                    AMediaFormat_getInt32 (f, AMEDIAFORMAT_KEY_WIDTH, &w);
+                    AMediaFormat_getInt32 (f, AMEDIAFORMAT_KEY_HEIGHT, &h);
+                }
+                __atomic_store_n (d->out_w, (gint) w, __ATOMIC_RELAXED);
+                __atomic_store_n (d->out_h, (gint) h, __ATOMIC_RELAXED);
+                LOGI ("decoder cikis formati: %s", AMediaFormat_toString (f));
+                AMediaFormat_delete (f);
+            }
+        } else if (idx != AMEDIACODEC_INFO_TRY_AGAIN_LATER && idx != AMEDIACODEC_INFO_OUTPUT_BUFFERS_CHANGED) {
+            /* Codec hata durumu: watchdog kare gelmedigini gorup yeniler. CPU yakma. */
+            LOGE ("dequeueOutputBuffer hata %zd", idx);
+            g_usleep (HWDEC_OUTPUT_TIMEOUT_US);
+        }
+    }
+    return NULL;
+}
+
+static HwDecoder *hwdec_new (VideoSlot *v, ANativeWindow *window, gint width, gint height) {
+    AMediaCodec *codec = AMediaCodec_createDecoderByType (HWDEC_MIME);
+    if (!codec) { LOGE ("HEVC donanim decoder yaratilamadi"); return NULL; }
+
+    AMediaFormat *fmt = AMediaFormat_new ();
+    AMediaFormat_setString (fmt, AMEDIAFORMAT_KEY_MIME, HWDEC_MIME);
+    AMediaFormat_setInt32 (fmt, AMEDIAFORMAT_KEY_WIDTH, width);
+    AMediaFormat_setInt32 (fmt, AMEDIAFORMAT_KEY_HEIGHT, height);
+    AMediaFormat_setInt32 (fmt, "low-latency", 1);   /* Android 11+; desteklemeyen yok sayar */
+    AMediaFormat_setInt32 (fmt, "priority", 0);      /* 0 = gercek zamanli */
+    /* Bilinen VPS/SPS/PPS: codec IDR gelmeden de baslasin (yenileme sonrasi kritik) */
+    if (v->csd && v->csd->len > 0) AMediaFormat_setBuffer (fmt, "csd-0", v->csd->data, v->csd->len);
+
+    media_status_t st = AMediaCodec_configure (codec, fmt, window, NULL, 0);
+    AMediaFormat_delete (fmt);
+    if (st != AMEDIA_OK) { LOGE ("codec configure hatasi %d", (int) st); AMediaCodec_delete (codec); return NULL; }
+    if ((st = AMediaCodec_start (codec)) != AMEDIA_OK) { LOGE ("codec start hatasi %d", (int) st); AMediaCodec_delete (codec); return NULL; }
+
+    HwDecoder *d = g_new0 (HwDecoder, 1);
+    d->codec = codec;
+    d->need_keyframe = !(v->csd && v->csd->len > 0);   /* csd varsa IRAP sart degil: akisi hemen ver */
+    d->kf_wait_since_us = g_get_monotonic_time ();
+    d->last_frame_us = &v->last_frame_us; d->last_fed_us = &v->last_fed_us;
+    d->out_w = &v->out_w; d->out_h = &v->out_h;
+    g_atomic_int_set (&d->running, 1);
+    d->out_thread = g_thread_try_new ("hwdec-out", hwdec_output_thread, d, NULL);
+    if (!d->out_thread) {
+        LOGE ("hwdec out thread acilamadi");
+        AMediaCodec_stop (codec); AMediaCodec_delete (codec); g_free (d); return NULL;
+    }
+    LOGI ("donanim decoder acildi %dx%d surface=%p csd=%u byte", width, height, window, v->csd ? v->csd->len : 0);
+    return d;
+}
+
+/* AU'yu codec'e verir. ASLA uzun bloklamaz (en fazla HWDEC_INPUT_TIMEOUT_US).
+ * Paket kaybinda IRAP beklenmez (kullanici tercihi: bekci yok); decoder kisa
+ * artifact ile bir sonraki IRAP'ta toparlar. IRAP yalniz csd bilinmeden
+ * acilan taze codec icin (sinirli sure) beklenir. */
+static void hwdec_feed (HwDecoder *d, const guint8 *data, gsize size, gint64 pts_us) {
+    __atomic_add_fetch (&d->aus_in, 1, __ATOMIC_RELAXED);
+    if (d->need_keyframe) {
+        if (au_has_irap (data, size)) d->need_keyframe = FALSE;
+        else if (g_get_monotonic_time () - d->kf_wait_since_us < HWDEC_KEYFRAME_WAIT_US) {
+            __atomic_add_fetch (&d->aus_dropped, 1, __ATOMIC_RELAXED); return;
+        } else {
+            if (!d->kf_warned) { LOGE ("%d ms icinde IRAP gelmedi, akis zorla veriliyor", HWDEC_KEYFRAME_WAIT_US / 1000); d->kf_warned = TRUE; }
+            d->need_keyframe = FALSE;
+        }
+    }
+    ssize_t idx = AMediaCodec_dequeueInputBuffer (d->codec, HWDEC_INPUT_TIMEOUT_US);
+    if (idx < 0) {
+        __atomic_add_fetch (&d->aus_dropped, 1, __ATOMIC_RELAXED);
+        gint64 run = __atomic_add_fetch (&d->in_timeout_run, 1, __ATOMIC_RELAXED);
+        if (run == 1 || run == 30 || run == 300)
+            LOGE ("codec input buffer vermiyor (%zd), ust uste %" G_GINT64_FORMAT " | AU in/fed/kare=%" G_GINT64_FORMAT "/%" G_GINT64_FORMAT "/%" G_GINT64_FORMAT,
+                  idx, run, __atomic_load_n (&d->aus_in, __ATOMIC_RELAXED), __atomic_load_n (&d->aus_fed, __ATOMIC_RELAXED),
+                  __atomic_load_n (&d->frames_out, __ATOMIC_RELAXED));
+        return;
+    }
+    if (__atomic_load_n (&d->in_timeout_run, __ATOMIC_RELAXED)) __atomic_store_n (&d->in_timeout_run, 0, __ATOMIC_RELAXED);
+    size_t cap = 0;
+    guint8 *buf = AMediaCodec_getInputBuffer (d->codec, (size_t) idx, &cap);
+    if (!buf || cap < size) {
+        LOGE ("input buffer yetersiz (%zu < %zu)", cap, size);
+        AMediaCodec_queueInputBuffer (d->codec, (size_t) idx, 0, 0, (uint64_t) pts_us, 0);   /* slotu geri ver */
+        __atomic_add_fetch (&d->aus_dropped, 1, __ATOMIC_RELAXED);
+        return;
+    }
+    memcpy (buf, data, size);   /* tek kopya: sikistirilmis AU (birkac KB) */
+    if (AMediaCodec_queueInputBuffer (d->codec, (size_t) idx, 0, size, (uint64_t) pts_us, 0) != AMEDIA_OK) { LOGE ("queueInputBuffer hatasi"); return; }
+    __atomic_add_fetch (&d->aus_fed, 1, __ATOMIC_RELAXED);
+    __atomic_store_n (d->last_fed_us, g_get_monotonic_time (), __ATOMIC_RELAXED);
+}
+
+static gpointer hwdec_close_thread (gpointer p) {
+    HwDecoder *d = p; gint64 t0 = g_get_monotonic_time ();
+    AMediaCodec_stop (d->codec); AMediaCodec_delete (d->codec);
+    gint64 ms = (g_get_monotonic_time () - t0) / 1000;
+    if (ms > 200) LOGE ("codec kapatma %lld ms surdu (HAL yavas)", (long long) ms);
+    g_free (d);
+    return NULL;
+}
+
+/* Out thread'i durdurur (sinirli bekleme), codec'i AYRI thread'de kapatir:
+ * asili HAL context thread'ini rehin alamaz. */
+static void hwdec_destroy_async (HwDecoder *d) {
+    g_atomic_int_set (&d->running, 0);
+    g_thread_join (d->out_thread); d->out_thread = NULL;
+    GThread *th = g_thread_try_new ("hwdec-close", hwdec_close_thread, d, NULL);
+    if (th) g_thread_unref (th); else hwdec_close_thread (d);
+}
+
+/* appsink'e AU geldi (streaming thread). Bloklamaz: decoder yoksa/mesgulse dusurur. */
+static GstFlowReturn appsink_new_sample_cb (GstAppSink *sink, gpointer ud) {
+    NativeData *nd = ud; VideoSlot *v = &nd->video;
+    GstSample *sample = gst_app_sink_pull_sample (sink);
+    if (!sample) return GST_FLOW_OK;
+    GstBuffer *buf = gst_sample_get_buffer (sample);
+    gint64 now = g_get_monotonic_time ();
+    __atomic_store_n (&v->last_input_us, now, __ATOMIC_RELAXED);
+
+    g_mutex_lock (&v->dec_lock);
+    if (buf && v->accept_input) {
+        GstMapInfo map;
+        if (gst_buffer_map (buf, &map, GST_MAP_READ)) {
+            if (!v->csd) v->csd = g_byte_array_new ();
+            au_extract_param_sets (map.data, map.size, v->csd);   /* parametre seti degisirse guncel kalsin */
+            if (!v->dec && nd->window && now - v->dec_fail_us > G_USEC_PER_SEC) {
+                gint w = 0, h = 0; GstCaps *caps = gst_sample_get_caps (sample);
+                if (caps) { GstStructure *st = gst_caps_get_structure (caps, 0); gst_structure_get_int (st, "width", &w); gst_structure_get_int (st, "height", &h); }
+                if (w <= 0 || h <= 0) { w = 1280; h = 720; }   /* ipucu; codec gercek boyutu SPS'ten alir */
+                v->dec = hwdec_new (v, nd->window, w, h);
+                if (v->dec) { __atomic_store_n (&v->last_frame_us, now, __ATOMIC_RELAXED); __atomic_store_n (&v->last_fed_us, now, __ATOMIC_RELAXED); }
+                else v->dec_fail_us = now;
+            }
+            if (v->dec) hwdec_feed (v->dec, map.data, map.size, now);
+            gst_buffer_unmap (buf, &map);
+        }
+    }
+    g_mutex_unlock (&v->dec_lock);
+    gst_sample_unref (sample);
+    return GST_FLOW_OK;
 }
 
 static void teardown_video (NativeData *d) {
     VideoSlot *v = &d->video;
     if (v->retry_source) { g_source_destroy (v->retry_source); g_source_unref (v->retry_source); v->retry_source = NULL; }
     if (v->bus_source) { g_source_destroy (v->bus_source); g_source_unref (v->bus_source); v->bus_source = NULL; }
-    if (v->pipeline) {
-        gst_element_set_state (v->pipeline, GST_STATE_NULL);
-        if (v->sink) { gst_object_unref (v->sink); v->sink = NULL; }
-        gst_object_unref (v->pipeline); v->pipeline = NULL;
+    /* 1. once girisi kapat ve codec'i (ayri thread'de) kapat */
+    g_mutex_lock (&v->dec_lock);
+    v->accept_input = FALSE;
+    if (v->dec) { hwdec_destroy_async (v->dec); v->dec = NULL; }
+    if (v->csd) { g_byte_array_free (v->csd, TRUE); v->csd = NULL; }
+    g_mutex_unlock (&v->dec_lock);
+    /* 2. appsink callback'lerini sok, pipeline'i yik (appsink bloklamadigi icin NULL hizli) */
+    if (v->appsink) {
+        GstAppSinkCallbacks none = { 0 };
+        gst_app_sink_set_callbacks (GST_APP_SINK (v->appsink), &none, NULL, NULL);
+        gst_object_unref (v->appsink); v->appsink = NULL;
     }
-    v->frames = v->frames_last = 0; v->caps_logged = FALSE;
+    if (v->pipeline) { gst_element_set_state (v->pipeline, GST_STATE_NULL); gst_object_unref (v->pipeline); v->pipeline = NULL; }
+    v->frames_last = 0; v->format_logged = FALSE; v->recycle_count = 0;
+    __atomic_store_n (&v->out_w, 0, __ATOMIC_RELAXED); __atomic_store_n (&v->out_h, 0, __ATOMIC_RELAXED);
 }
 
 static void video_error_cb (GstBus *bus, GstMessage *msg, NativeData *d) {
@@ -141,14 +383,14 @@ static gboolean build_video (NativeData *d) {
     VideoSlot *v = &d->video; GError *err = NULL;
     teardown_video (d);
     g_free (v->desc);
-    /* Bu cihazda calisan referans (tutorial-5.c) ile ayni sekil: decoder'i
-     * decodebin3 secer (donanim amcviddec), sink GL yolu. Ekstra bekci/filtre yok. */
+    /* GStreamer yalniz ag + depay + parse. AU'lar appsink'ten AMediaCodec'e gider.
+     * appsink max-buffers=2 drop=true: codec yetisemezse en eski AU atilir, geri basinc yok. */
     v->desc = g_strdup_printf (
         "udpsrc port=%d buffer-size=2097152 caps=\"application/x-rtp,media=video,clock-rate=90000,encoding-name=H265,payload=96\" ! "
         "rtpjitterbuffer latency=%d drop-on-latency=true ! "
-        "rtph265depay ! h265parse config-interval=-1 ! decodebin3 ! "
-        "queue max-size-buffers=2 max-size-time=0 max-size-bytes=0 leaky=downstream ! "
-        "glimagesink force-aspect-ratio=false name=vsink sync=false",
+        "rtph265depay ! h265parse config-interval=-1 ! "
+        "video/x-h265,stream-format=byte-stream,alignment=au ! "
+        "appsink name=asink sync=false max-buffers=2 drop=true emit-signals=false",
         d->video_port, d->latency_ms);
     LOGI ("video pipeline: %s", v->desc);
     v->pipeline = gst_parse_launch (v->desc, &err);
@@ -158,11 +400,17 @@ static gboolean build_video (NativeData *d) {
         if (v->pipeline) { gst_object_unref (v->pipeline); v->pipeline = NULL; }
         return FALSE;
     }
-    v->sink = gst_bin_get_by_name (GST_BIN (v->pipeline), "vsink");
-    GstPad *pad = gst_element_get_static_pad (v->sink, "sink");
-    gst_pad_add_probe (pad, GST_PAD_PROBE_TYPE_BUFFER, count_frames_probe, v, NULL);
-    gst_object_unref (pad);
-    if (d->window) gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (v->sink), (guintptr) d->window);
+    v->appsink = gst_bin_get_by_name (GST_BIN (v->pipeline), "asink");
+    GstAppSinkCallbacks cbs = { 0 }; cbs.new_sample = appsink_new_sample_cb;
+    gst_app_sink_set_callbacks (GST_APP_SINK (v->appsink), &cbs, d, NULL);
+
+    g_mutex_lock (&v->dec_lock);
+    v->accept_input = TRUE; v->dec_fail_us = 0;
+    g_mutex_unlock (&v->dec_lock);
+    gint64 now = g_get_monotonic_time ();
+    __atomic_store_n (&v->last_input_us, now, __ATOMIC_RELAXED);
+    __atomic_store_n (&v->last_fed_us, now, __ATOMIC_RELAXED);
+    __atomic_store_n (&v->last_frame_us, now, __ATOMIC_RELAXED);
 
     GstBus *bus = gst_element_get_bus (v->pipeline);
     v->bus_source = gst_bus_create_watch (bus);
@@ -194,9 +442,7 @@ static gboolean video_retry_cb (gpointer ud) {
 /* Backoff 1,2,4,8,8... s; bekleyen varsa tekrar kuyruklanmaz (debounce) */
 static void schedule_video_rebuild (NativeData *d) {
     VideoSlot *v = &d->video;
-    if (v->pipeline) {   /* hatali pipeline'i hemen durdur, sinyal cikisinda yik */
-        gst_element_set_state (v->pipeline, GST_STATE_NULL);
-    }
+    if (v->pipeline) gst_element_set_state (v->pipeline, GST_STATE_NULL);   /* hatali pipeline'i hemen durdur */
     if (v->retry_source || !d->running) return;
     guint shift = v->retry_count < 3 ? v->retry_count : 3;
     if (v->retry_count < 1000) v->retry_count++;
@@ -204,6 +450,35 @@ static void schedule_video_rebuild (NativeData *d) {
     g_source_set_callback (s, video_retry_cb, d, NULL);
     g_source_attach (s, d->context);
     v->retry_source = s;
+}
+
+/* Watchdog (stats timer'dan, 1 Hz): AU codec'e veriliyor ama STALL_TIMEOUT_US
+ * boyunca kare yok -> yalniz codec yenilenir (ag/pipeline kalir, ilk AU'da csd ile
+ * acilir). 60 s icinde RECYCLE_LIMIT yenileme -> pipeline da yeniden kurulur.
+ * AU gelmiyorsa (K9 video gondermiyor / link yok) dokunulmaz: udpsrc beklemede. */
+static void video_watchdog (NativeData *d, gint64 now) {
+    VideoSlot *v = &d->video;
+    if (!v->pipeline || v->retry_source) return;
+    gint64 fed_age   = now - __atomic_load_n (&v->last_fed_us,   __ATOMIC_RELAXED);
+    gint64 frame_age = now - __atomic_load_n (&v->last_frame_us, __ATOMIC_RELAXED);
+    if (frame_age < STALL_TIMEOUT_US || fed_age >= STALL_TIMEOUT_US) return;
+    if (now - v->last_recycle_us > RECYCLE_WINDOW_US) v->recycle_count = 0;
+    g_mutex_lock (&v->dec_lock);
+    if (v->dec) {
+        v->recycle_count++; v->last_recycle_us = now;
+        LOGE ("DECODER STALL: AU veriliyor ama %lld ms kare yok -> codec yenileniyor (%d/%d)",
+              (long long) (frame_age / 1000), v->recycle_count, RECYCLE_LIMIT);
+        hwdec_destroy_async (v->dec); v->dec = NULL;
+        __atomic_store_n (&v->last_frame_us, now, __ATOMIC_RELAXED);
+        if (v->recycle_count >= RECYCLE_LIMIT) {
+            v->recycle_count = 0; v->retry_count = 0;
+            g_mutex_unlock (&v->dec_lock);
+            LOGE ("ust uste codec yenileme -> video pipeline yeniden kuruluyor");
+            schedule_video_rebuild (d);
+            return;
+        }
+    }
+    g_mutex_unlock (&v->dec_lock);
 }
 
 /* ------------------------------------------------------------- ses */
@@ -253,19 +528,16 @@ static void set_audio_state (NativeData *d, gboolean on) {
 /* ------------------------------------------------------------ stats */
 static gboolean stats_cb (gpointer ud) {
     NativeData *d = ud; VideoSlot *v = &d->video;
-    gint now = g_atomic_int_get (&v->frames);
-    gint fps = now - v->frames_last; v->frames_last = now;
-    gint w = 0, h = 0;
-    if (v->sink) {
-        GstPad *pad = gst_element_get_static_pad (v->sink, "sink");
-        GstCaps *caps = gst_pad_get_current_caps (pad);
-        if (caps) {
-            GstStructure *s = gst_caps_get_structure (caps, 0); gst_structure_get_int (s, "width", &w); gst_structure_get_int (s, "height", &h);
-            if (!v->caps_logged) { gchar *cs = gst_caps_to_string (caps); LOGI ("video sink caps: %s", cs); g_free (cs); v->caps_logged = TRUE; }
-            gst_caps_unref (caps);
-        }
-        gst_object_unref (pad);
-    }
+    gint64 now = g_get_monotonic_time ();
+    gint64 frames = 0;
+    g_mutex_lock (&v->dec_lock);
+    if (v->dec) frames = __atomic_load_n (&v->dec->frames_out, __ATOMIC_RELAXED);
+    g_mutex_unlock (&v->dec_lock);
+    gint fps = (gint) (frames - v->frames_last); if (fps < 0) fps = 0;
+    v->frames_last = frames;
+    gint w = __atomic_load_n (&v->out_w, __ATOMIC_RELAXED), h = __atomic_load_n (&v->out_h, __ATOMIC_RELAXED);
+    if (w > 0 && !v->format_logged) { LOGI ("video %dx%d", w, h); v->format_logged = TRUE; }
+    video_watchdog (d, now);
     JNIEnv *env = get_jni_env ();
     if (env) { (*env)->CallVoidMethod (env, d->app, on_stats_mid, fps, w, h); if ((*env)->ExceptionCheck (env)) (*env)->ExceptionClear (env); }
     return G_SOURCE_CONTINUE;
@@ -327,22 +599,36 @@ static gboolean stop_cb (gpointer p) {
 }
 
 typedef struct { NativeData *d; ANativeWindow *w; } SurfaceReq;
+/* Yuzey degisti: pipeline'a dokunulmaz. Codec varsa yuzeyi yerinde degistirir
+ * (setOutputSurface, API 23+), olmazsa codec yenilenir; ilk AU'da yeniden acilir. */
 static gboolean surface_set_cb (gpointer p) {
-    SurfaceReq *r = p; NativeData *d = r->d;
+    SurfaceReq *r = p; NativeData *d = r->d; VideoSlot *v = &d->video;
+    ANativeWindow *old = NULL;
+    g_mutex_lock (&v->dec_lock);
     if (d->window && d->window == r->w) {
         ANativeWindow_release (r->w);            /* ayni pencere: fazladan alinan ref'i birak */
     } else {
-        if (d->window) { teardown_video (d); ANativeWindow_release (d->window); }   /* GL baglami pencereye bagli */
-        d->window = r->w;
+        old = d->window; d->window = r->w;
+        if (v->dec) {
+            if (!d->window || AMediaCodec_setOutputSurface (v->dec->codec, d->window) != AMEDIA_OK) {
+                if (d->window) LOGE ("setOutputSurface basarisiz, decoder yenileniyor");
+                hwdec_destroy_async (v->dec); v->dec = NULL;
+            }
+        }
     }
-    if (d->video.sink) { gst_video_overlay_set_window_handle (GST_VIDEO_OVERLAY (d->video.sink), (guintptr) d->window); gst_video_overlay_expose (GST_VIDEO_OVERLAY (d->video.sink)); }
-    else if (d->running) start_video (d);
+    g_mutex_unlock (&v->dec_lock);
+    if (old) ANativeWindow_release (old);        /* codec yeni yuzeye gectikten sonra */
+    if (d->running && !v->pipeline) start_video (d);
     return G_SOURCE_REMOVE;
 }
+/* Yuzey gidiyor: codec yuzeysiz calisamaz -> kapat. Pipeline kalir, AU'lar dusurulur. */
 static gboolean surface_release_cb (gpointer p) {
-    NativeData *d = p;
-    teardown_video (d);                          /* GL baglami surface'e bagli: once yik */
-    if (d->window) { ANativeWindow_release (d->window); d->window = NULL; }
+    NativeData *d = p; VideoSlot *v = &d->video; ANativeWindow *w;
+    g_mutex_lock (&v->dec_lock);
+    if (v->dec) { hwdec_destroy_async (v->dec); v->dec = NULL; }
+    w = d->window; d->window = NULL;
+    g_mutex_unlock (&v->dec_lock);
+    if (w) ANativeWindow_release (w);
     return G_SOURCE_REMOVE;
 }
 
@@ -376,6 +662,7 @@ static void n_init (JNIEnv *env, jobject thiz) {
     d->app = (*env)->NewGlobalRef (env, thiz);
     d->listen = TRUE;
     d->host = g_strdup ("192.168.2.199"); d->video_port = 5001; d->audio_rx_port = 14551; d->audio_tx_port = 14552; d->latency_ms = 200;
+    g_mutex_init (&d->video.dec_lock);
     d->context = g_main_context_new ();
     d->main_loop = g_main_loop_new (d->context, FALSE);
     SET_DATA (env, thiz, d);
@@ -390,6 +677,7 @@ static void n_finalize (JNIEnv *env, jobject thiz) {
     g_main_loop_unref (d->main_loop);
     if (d->window) { ANativeWindow_release (d->window); d->window = NULL; }
     (*env)->DeleteGlobalRef (env, d->app);
+    g_mutex_clear (&d->video.dec_lock);
     g_free (d->video.desc); g_free (d->host); g_free (d);
     SET_DATA (env, thiz, NULL);
 }
