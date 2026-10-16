@@ -24,9 +24,11 @@ include $(GSTREAMER_NDK_BUILD_PATH)/plugins.mk
 # Yalniz gerekenler: udpsrc/rtp (NET), h265parse+opus (CODECS), opensles (SYS),
 # jitterbuffer/queue/app (CORE). Video cozme AMediaCodec (NDK), GStreamer disinda.
 GSTREAMER_PLUGINS := $(GSTREAMER_PLUGINS_CORE) \
+                     $(GSTREAMER_PLUGINS_PLAYBACK) \
                      $(GSTREAMER_PLUGINS_CODECS) \
                      $(GSTREAMER_PLUGINS_NET) \
                      $(GSTREAMER_PLUGINS_SYS) \
+                     $(GSTREAMER_PLUGINS_CAPTURE) \
                      $(GSTREAMER_PLUGINS_CODECS_RESTRICTED)
 GSTREAMER_EXTRA_DEPS := gstreamer-video-1.0 gstreamer-audio-1.0 gstreamer-app-1.0
 include $(GSTREAMER_NDK_BUILD_PATH)/gstreamer-1.0.mk

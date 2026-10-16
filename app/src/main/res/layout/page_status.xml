@@ -55,7 +55,7 @@
                 <LinearLayout style="@style/StatRow"><TextView style="@style/StatLabel" android:text="Kiosk" /><TextView android:id="@+id/st_kiosk" style="@style/StatValue" android:text="-" /></LinearLayout>
                 <LinearLayout style="@style/StatRow"><TextView style="@style/StatLabel" android:text="Depolama" /><TextView android:id="@+id/st_disk" style="@style/StatValue" android:text="-" /></LinearLayout>
                 <LinearLayout style="@style/StatRow"><TextView style="@style/StatLabel" android:text="Sürüm" /><TextView android:id="@+id/st_version" style="@style/StatValue" android:text="-" /></LinearLayout>
-                <LinearLayout style="@style/StatRow"><TextView style="@style/StatLabel" android:text="Son güncelleme" /><TextView android:id="@+id/st_updated" style="@style/StatValue" android:layout_marginEnd="8dp" android:text="-" /><Button android:id="@+id/st_refresh" style="@style/StatBtn" android:text="YENİLE" /></LinearLayout>
+                <LinearLayout style="@style/StatRow" android:layout_height="40dp"><TextView style="@style/StatLabel" android:text="Son güncelleme" /><TextView android:id="@+id/st_updated" style="@style/StatValue" android:layout_marginEnd="8dp" android:text="-" /><Button android:id="@+id/st_refresh" style="@style/StatBtn" android:text="YENİLE" /></LinearLayout>
             </LinearLayout>
             <ImageView style="@style/StatBadge" android:src="@drawable/ic_phone_24" android:importantForAccessibility="no" />
         </FrameLayout>
