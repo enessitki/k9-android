@@ -14,9 +14,15 @@ android {
 
         externalNativeBuild {
             ndkBuild {
-                def gstRoot = project.hasProperty('gstAndroidRoot') ? project.gstAndroidRoot : System.env.GSTREAMER_ROOT_ANDROID
-                if (gstRoot == null)
-                    throw new GradleException('GSTREAMER_ROOT_ANDROID ortam degiskeni ya da gradle.properties icinde gstAndroidRoot tanimli olmali (GStreamer Android universal dizini)')
+                // GStreamer dizini: once local.properties (makineye ozel, git disi), sonra
+                // gradle.properties, sonra GSTREAMER_ROOT_ANDROID ortam degiskeni.
+                def localProps = new Properties()
+                def localFile = rootProject.file('local.properties')
+                if (localFile.exists()) localFile.withInputStream { localProps.load(it) }
+                def gstRoot = localProps.getProperty('gstAndroidRoot') ?:
+                        (project.hasProperty('gstAndroidRoot') ? project.gstAndroidRoot : System.env.GSTREAMER_ROOT_ANDROID)
+                if (gstRoot == null || !new File(gstRoot).isDirectory())
+                    throw new GradleException("GStreamer Android universal dizini bulunamadi: '${gstRoot}'. local.properties icine gstAndroidRoot=/yol yazin (ya da gradle.properties / GSTREAMER_ROOT_ANDROID)")
                 arguments "NDK_APPLICATION_MK=src/main/jni/Application.mk",
                           "GSTREAMER_JAVA_SRC_DIR=src/main/java",
                           "GSTREAMER_ROOT_ANDROID=$gstRoot",
